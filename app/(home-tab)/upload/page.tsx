@@ -1,9 +1,9 @@
 import ProtectedPage from "@/components/protected-page";
 
-export default function Profile() {
+export default function Upload() {
   return (
     <ProtectedPage>
-      <div>Profile</div>
+      <div>Upload</div>
     </ProtectedPage>
   );
 }

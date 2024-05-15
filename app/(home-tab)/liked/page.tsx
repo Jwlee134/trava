@@ -1,3 +1,9 @@
+import ProtectedPage from "@/components/protected-page";
+
 export default function Liked() {
-  return <div>Liked</div>;
+  return (
+    <ProtectedPage>
+      <div>Liked</div>
+    </ProtectedPage>
+  );
 }
