@@ -1,6 +1,7 @@
 import getSession from "@/libs/session";
 import { ReactNode } from "react";
 import LoginRequired from "./login-required";
+import FullScreenPage from "./full-screen-page";
 
 export default async function ProtectedPage({
   children,
@@ -12,9 +13,9 @@ export default async function ProtectedPage({
   return (
     <>
       {!session.id ? (
-        <div className="min-h-[100dvh] flex items-center justify-center">
+        <FullScreenPage>
           <LoginRequired />
-        </div>
+        </FullScreenPage>
       ) : (
         children
       )}

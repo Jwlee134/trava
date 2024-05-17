@@ -31,19 +31,17 @@ model Photo {
   title        String?
   caption      String?
   format       String?
-  size         String?
   date         String?
   deviceModel  String?
   lensModel    String?
-  resolution   String? // e.g. 20MP
-  dimensions   String? // e.g. 4000 ｘ 5000
-  iso          String?
+  dimensions   String?
+  iso          Int?
   focalLength  String?
   exposure     String?
   aperture     String?
   shutterSpeed String?
-  latitude     String?
-  longitude    String?
+  latitude     Float?
+  longitude    Float?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
