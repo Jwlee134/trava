@@ -2,10 +2,10 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 
 interface SessionData {
-  id?: string;
+  id?: number;
 }
 
-export async function setSession(id: string) {
+export async function setSession(id: number) {
   const session = await getSession();
   session.id = id;
   await session.save();
