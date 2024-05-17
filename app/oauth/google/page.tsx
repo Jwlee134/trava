@@ -1,6 +1,7 @@
 "use client";
 
 import OauthLoader from "@/components/oauth-loader";
+import api from "@/libs/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -13,7 +14,7 @@ export default function Google() {
 
   useEffect(() => {
     if (ignore.current) return;
-    fetch(`/api/v1/oauth/google?code=${code}`, { method: "POST" }).then(() => {
+    api(`/oauth/google?code=${code}`, { method: "POST" }).then(() => {
       router.replace(redirectUri!);
     });
     return () => {
