@@ -18,7 +18,7 @@ model User {
   googleId  String?  @unique
   kakaoId   String?  @unique
   username  String
-  avatar    String?
+  avatar    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   photos    Photo[]
@@ -30,12 +30,15 @@ model Photo {
   url          String
   title        String?
   caption      String?
-  format       String?
+  format       String
   date         String?
   deviceModel  String?
   lensModel    String?
-  dimensions   String?
-  iso          Int?
+  resolution   String
+  width        Int
+  height       Int
+  dimensions   String
+  iso          String?
   focalLength  String?
   exposure     String?
   aperture     String?

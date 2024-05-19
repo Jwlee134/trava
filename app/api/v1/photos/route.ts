@@ -3,6 +3,23 @@ import ExifReader from "exifreader";
 import { uploadPhoto } from "@/libs/aws";
 import prisma from "@/libs/db";
 import getSession from "@/libs/session";
+import { revalidateTag } from "next/cache";
+import { Prisma } from "@prisma/client";
+
+export type GetPhotosResponse = Prisma.PromiseReturnType<typeof getPhotos>;
+
+async function getPhotos() {
+  return await prisma.photo.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, url: true },
+  });
+}
+
+export async function GET() {
+  const photos = await getPhotos();
+
+  return Response.json(photos);
+}
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -18,24 +35,30 @@ export async function POST(request: NextRequest) {
     const yyyymmdd = dateArr[0].replaceAll(":", "-");
     date = new Date(`${yyyymmdd}T${dateArr[1]}`).toISOString();
   }
+  const width = exif["Image Width"]?.value ?? 0;
+  const height = exif["Image Height"]?.value ?? 0;
+  let resolution = Math.round(((width * height) / 1000000) * 10) / 10;
+  resolution = resolution >= 1 ? Number(resolution.toFixed()) : resolution;
+  const exposure = Number(
+    (Math.round(Number(exif.ExposureBiasValue?.description) * 10) / 10).toFixed(
+      1
+    )
+  );
+
   const exifObj = {
     format: exif["FileType"].description,
     deviceModel: exif.Model?.description ?? null,
     lensModel: exif.LensModel?.description ?? null,
-    dimensions:
-      exif["Image Height"]?.value && exif["Image Width"]?.value
-        ? `${exif["Image Width"]?.value} × ${exif["Image Height"]?.value}`
-        : null,
+    width,
+    height,
+    resolution: `${resolution} MP`,
+    dimensions: `${width} × ${height}`,
     iso: exif.ISOSpeedRatings?.description
-      ? parseInt(exif.ISOSpeedRatings?.description)
+      ? `ISO ${exif.ISOSpeedRatings?.description}`
       : null,
     focalLength: exif.FocalLength?.description ?? null,
     exposure: exif.ExposureBiasValue?.description
-      ? `${
-          (
-            Math.round(Number(exif.ExposureBiasValue?.description) * 10) / 10
-          ).toFixed(1) || 0
-        } ev`
+      ? `${exposure || 0} ev`
       : null,
     aperture: exif.FNumber?.description ?? null,
     shutterSpeed: exif.ShutterSpeedValue?.description
@@ -63,6 +86,9 @@ export async function POST(request: NextRequest) {
     },
     select: { id: true },
   });
+
+  revalidateTag("photos");
+  revalidateTag("photo-detail");
 
   return Response.json({ id: newPhoto.id });
 }

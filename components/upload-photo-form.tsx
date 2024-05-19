@@ -26,7 +26,7 @@ export default function UploadPhotoForm() {
     formData.append("photo", data.photo[0]);
     if (data.title) formData.append("title", data.title);
     if (data.caption) formData.append("caption", data.caption);
-    api<{ id: number }>("/photo", { method: "POST", body: formData })
+    api<{ id: number }>("/photos", { method: "POST", body: formData })
       .then(({ id }) => {
         router.push(`/photos/${id}`);
       })
