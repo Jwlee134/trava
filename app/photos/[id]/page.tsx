@@ -1,6 +1,8 @@
-import { PhotoDetailResponse } from "@/app/api/v1/photos/[id]/route";
+import { GetPhotoResponse } from "@/app/api/v1/photos/[id]/route";
+import LikeStatus from "@/components/like-status";
 import PhotoDetailMap from "@/components/photo-detail-map";
 import api from "@/libs/api";
+import getSession from "@/libs/session";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { IoMdImage } from "react-icons/io";
@@ -8,9 +10,18 @@ import { IoCamera } from "react-icons/io5";
 import { RiCameraLensFill, RiMapPinTimeFill } from "react-icons/ri";
 
 async function getPhoto(id: number) {
-  return await api<PhotoDetailResponse>(`/photos/${id}`, {
+  return await api<GetPhotoResponse>(`/photos/${id}`, {
     method: "GET",
     next: { tags: ["photo-detail", `photos-${id}`] },
+  });
+}
+
+async function getIsLiked(id: number) {
+  const session = await getSession();
+  if (!session.id) return false;
+  return await api<boolean>(`/photos/${id}/like?userId=${session.id}`, {
+    method: "GET",
+    next: { tags: [`like-status-${id}`] },
   });
 }
 
@@ -23,6 +34,7 @@ export default async function PhotoDetail({
   if (isNaN(id)) return notFound();
   const photo = await getPhoto(id);
   if (!photo) return notFound();
+  const isLiked = await getIsLiked(id);
 
   const date = photo.date
     ? new Intl.DateTimeFormat("en-US", {
@@ -42,18 +54,21 @@ export default async function PhotoDetail({
         className="w-full h-auto"
       />
       <div className="p-3">
-        <div className="flex items-center gap-3">
-          <div className="avatar">
-            <div className="w-12 rounded-full">
-              <Image
-                src={photo.user.avatar}
-                alt={photo.user.username}
-                width={48}
-                height={48}
-              />
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="avatar">
+              <div className="w-12 rounded-full">
+                <Image
+                  src={photo.user.avatar}
+                  alt={photo.user.username}
+                  width={48}
+                  height={48}
+                />
+              </div>
             </div>
+            <span>{photo.user.username}</span>
           </div>
-          <span>{photo.user.username}</span>
+          <LikeStatus id={photo.id} isLiked={isLiked} />
         </div>
         <div className="divider m-1"></div>
         {photo.title && <h1 className="text-lg break-words">{photo.title}</h1>}
@@ -74,17 +89,17 @@ export default async function PhotoDetail({
           </div>
           <div className="p-1.5 opacity-50 text-sm flex flex-col gap-1 [&>*]:flex [&>*]:items-center [&>*]:gap-2">
             <div>
-              <RiCameraLensFill size={20} />
+              <RiCameraLensFill size={18} />
               {photo.lensModel ?? "No lens information"}
             </div>
             <div>
-              <IoMdImage size={20} />
+              <IoMdImage size={18} />
               <span>{photo.resolution}</span>
               <span> • </span>
               <span>{photo.dimensions}</span>
             </div>
             <div>
-              <RiMapPinTimeFill size={20} />
+              <RiMapPinTimeFill size={18} />
               <span>{date}</span>
             </div>
           </div>
