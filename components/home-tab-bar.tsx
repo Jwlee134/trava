@@ -4,14 +4,10 @@ import { cls } from "@/libs/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  IoMap,
-  IoMapOutline,
   IoHome,
   IoHomeOutline,
   IoCloudUpload,
   IoCloudUploadOutline,
-  IoHeart,
-  IoHeartOutline,
   IoPerson,
   IoPersonOutline,
 } from "react-icons/io5";
@@ -22,9 +18,7 @@ export default function HomeTabBar() {
   const pathname = usePathname();
 
   const isHome = pathname === "/";
-  const isMap = pathname === "/map";
   const isUpload = pathname === "/upload";
-  const isLiked = pathname === "/liked";
   const isProfile = pathname === "/profile";
 
   return (
@@ -36,25 +30,11 @@ export default function HomeTabBar() {
           <IoHomeOutline size={TAB_ICON_SIZE} />
         )}
       </Link>
-      <Link href="/map" className={cls(isMap ? "active" : "")}>
-        {isMap ? (
-          <IoMap size={TAB_ICON_SIZE} />
-        ) : (
-          <IoMapOutline size={TAB_ICON_SIZE} />
-        )}
-      </Link>
       <Link href="/upload" className={cls(isUpload ? "active" : "")}>
         {isUpload ? (
           <IoCloudUpload size={TAB_ICON_SIZE} />
         ) : (
           <IoCloudUploadOutline size={TAB_ICON_SIZE} />
-        )}
-      </Link>
-      <Link href="/liked" className={cls(isLiked ? "active" : "")}>
-        {isLiked ? (
-          <IoHeart size={TAB_ICON_SIZE} />
-        ) : (
-          <IoHeartOutline size={TAB_ICON_SIZE} />
         )}
       </Link>
       <Link href="/profile" className={cls(isProfile ? "active" : "")}>
