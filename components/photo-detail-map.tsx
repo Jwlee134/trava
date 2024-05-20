@@ -52,7 +52,13 @@ export default function PhotoDetailMap({ url, lat, lng }: PhotoDetailMapProps) {
         createPortal(
           <div className="p-1.5">
             <div className="relative size-20 rounded overflow-hidden">
-              <Image src={url} alt="Photo" fill className="object-cover" />
+              <Image
+                src={url}
+                alt="Photo"
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
             </div>
           </div>,
           node

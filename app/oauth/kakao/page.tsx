@@ -3,9 +3,9 @@
 import OauthLoader from "@/components/oauth-loader";
 import api from "@/libs/api";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 
-export default function Kakao() {
+function Component() {
   const ignore = useRef(false);
   const params = useSearchParams();
   const code = params.get("code");
@@ -23,4 +23,12 @@ export default function Kakao() {
   }, [code, router, redirectUri]);
 
   return <OauthLoader />;
+}
+
+export default function Kakao() {
+  return (
+    <Suspense>
+      <Component />
+    </Suspense>
+  );
 }

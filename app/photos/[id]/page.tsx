@@ -56,6 +56,7 @@ export default async function PhotoDetail({
         height={photo.height}
         sizes="100vw"
         className="w-full h-auto"
+        priority
       />
       <div className="p-3">
         <div className="flex justify-between items-center">
@@ -87,15 +88,11 @@ export default async function PhotoDetail({
           </div>
         </div>
         <div className="divider m-1"></div>
-        <div className="mb-3">
-          {photo.title && (
-            <h1 className="text-lg break-words">{photo.title}</h1>
-          )}
-          {photo.caption && (
-            <h1 className="opacity-70 whitespace-pre-line break-words">
-              {photo.caption}
-            </h1>
-          )}
+        <div className="mt-3 mb-5">
+          <h1 className="text-lg break-words">{photo.title || "No title"}</h1>
+          <h1 className="opacity-70 whitespace-pre-line break-words">
+            {photo.caption || "No caption"}
+          </h1>
         </div>
         <div className="bg-base-200 rounded-lg overflow-hidden mb-3">
           <div className="flex justify-between items-center bg-base-300 p-1.5">

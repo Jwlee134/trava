@@ -21,7 +21,13 @@ export default async function Home() {
           href={`/photos/${photo.id}`}
           className="relative aspect-square"
         >
-          <Image src={photo.url} alt="photo" fill className="object-cover" />
+          <Image
+            src={photo.url}
+            alt="photo"
+            fill
+            className="object-cover"
+            sizes="33vw"
+          />
         </Link>
       ))}
     </div>
