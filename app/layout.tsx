@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Nunito } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
+import localFont from "next/font/local";
 
-const inter = Inter({ subsets: ["latin"] });
+const nunito = Nunito({ subsets: ["latin"] });
+const poetsenone = localFont({ src: "./poetsenone.ttf" });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,7 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <header className="navbar bg-base-100 fixed top-0 px-4 z-50">
+          <Link href="/" className={`${poetsenone.className} text-2xl`}>
+            Trava
+          </Link>
+        </header>
+        <main className={`${nunito.className} pt-16`}>{children}</main>
+      </body>
     </html>
   );
 }
