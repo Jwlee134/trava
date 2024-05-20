@@ -1,5 +1,7 @@
 import { GetPhotoResponse } from "@/app/api/v1/photos/[id]/route";
-import EditPhotoButton from "@/components/edit-photo-button";
+import DeletePhotoForm from "@/components/delete-photo-form";
+import EditPhotoForm from "@/components/edit-photo-form";
+import EditPhotoModal from "@/components/edit-photo-modal";
 import LikeButton from "@/components/like-button";
 import PhotoDetailMap from "@/components/photo-detail-map";
 import api from "@/libs/api";
@@ -72,18 +74,29 @@ export default async function PhotoDetail({
           </div>
           <div className="flex items-center">
             {session.id === photo.user.id && (
-              <EditPhotoButton title={photo.title} caption={photo.caption} />
+              <EditPhotoModal>
+                <EditPhotoForm
+                  id={id}
+                  title={photo.title}
+                  caption={photo.caption}
+                />
+                <DeletePhotoForm id={id} />
+              </EditPhotoModal>
             )}
             <LikeButton id={photo.id} isLiked={isLiked} />
           </div>
         </div>
         <div className="divider m-1"></div>
-        {photo.title && <h1 className="text-lg break-words">{photo.title}</h1>}
-        {photo.caption && (
-          <h1 className="opacity-70 mb-3 whitespace-pre-line break-words">
-            {photo.caption}
-          </h1>
-        )}
+        <div className="mb-3">
+          {photo.title && (
+            <h1 className="text-lg break-words">{photo.title}</h1>
+          )}
+          {photo.caption && (
+            <h1 className="opacity-70 whitespace-pre-line break-words">
+              {photo.caption}
+            </h1>
+          )}
+        </div>
         <div className="bg-base-200 rounded-lg overflow-hidden mb-3">
           <div className="flex justify-between items-center bg-base-300 p-1.5">
             <span className="flex items-center gap-2">
