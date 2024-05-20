@@ -1,5 +1,6 @@
 import { GetPhotoResponse } from "@/app/api/v1/photos/[id]/route";
-import LikeStatus from "@/components/like-status";
+import EditPhotoButton from "@/components/edit-photo-button";
+import LikeButton from "@/components/like-button";
 import PhotoDetailMap from "@/components/photo-detail-map";
 import api from "@/libs/api";
 import getSession from "@/libs/session";
@@ -35,6 +36,7 @@ export default async function PhotoDetail({
   const photo = await getPhoto(id);
   if (!photo) return notFound();
   const isLiked = await getIsLiked(id);
+  const session = await getSession();
 
   const date = photo.date
     ? new Intl.DateTimeFormat("en-US", {
@@ -44,7 +46,7 @@ export default async function PhotoDetail({
     : "No date information";
 
   return (
-    <div>
+    <>
       <Image
         src={photo.url}
         alt={photo.title ?? "Photo"}
@@ -68,7 +70,12 @@ export default async function PhotoDetail({
             </div>
             <span>{photo.user.username}</span>
           </div>
-          <LikeStatus id={photo.id} isLiked={isLiked} />
+          <div className="flex items-center">
+            {session.id === photo.user.id && (
+              <EditPhotoButton title={photo.title} caption={photo.caption} />
+            )}
+            <LikeButton id={photo.id} isLiked={isLiked} />
+          </div>
         </div>
         <div className="divider m-1"></div>
         {photo.title && <h1 className="text-lg break-words">{photo.title}</h1>}
@@ -119,6 +126,6 @@ export default async function PhotoDetail({
           />
         )}
       </div>
-    </div>
+    </>
   );
 }
