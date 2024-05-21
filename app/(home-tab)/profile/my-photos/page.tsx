@@ -1,27 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getLikedPhotos } from "./actions";
+import { getMyPhotos } from "./actions";
 import FullScreenPage from "@/components/full-screen-page";
 
-export default async function LikedPhotos() {
-  const photos = await getLikedPhotos();
+export default async function MyPhotos() {
+  const photos = await getMyPhotos();
 
   if (!photos.length)
     return (
       <FullScreenPage>
-        <span className="text-sm">You have no liked photos.</span>
+        <span className="text-sm">You haven&apos;t uploaded photos.</span>
       </FullScreenPage>
     );
   return (
     <div className="grid grid-cols-3 gap-1">
-      {photos.map(({ photo }) => (
+      {photos.map(({ id, url }) => (
         <Link
-          key={photo.id}
-          href={`/photos/${photo.id}`}
+          key={id}
+          href={`/photos/${id}`}
           className="relative aspect-square"
         >
           <Image
-            src={photo.url}
+            src={url}
             alt="photo"
             fill
             className="object-cover"
