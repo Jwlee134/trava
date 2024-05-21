@@ -50,6 +50,7 @@ model Photo {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int
   likes        Like[]
+  views        Int      @default(0)
 }
 
 model Like {

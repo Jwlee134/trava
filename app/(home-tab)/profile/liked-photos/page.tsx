@@ -9,7 +9,7 @@ export default async function LikedPhotos() {
   if (!photos.length)
     return (
       <FullScreenPage>
-        <span className="text-sm">You have no liked photos.</span>
+        <span className="text-sm">You haven&apos;t liked photos.</span>
       </FullScreenPage>
     );
   return (

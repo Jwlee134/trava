@@ -4,14 +4,24 @@ import { dislikePhoto, likePhoto } from "@/app/photos/[id]/actions";
 import { useOptimistic } from "react";
 
 interface LikeButtonProps {
+  disabled: boolean;
   id: number;
   isLiked: boolean;
+  likeCount: number;
 }
 
-export default function LikeButton({ id, isLiked }: LikeButtonProps) {
+export default function LikeButton({
+  disabled,
+  id,
+  isLiked,
+  likeCount,
+}: LikeButtonProps) {
   const [state, dispatch] = useOptimistic(
-    isLiked,
-    (currentState) => !currentState
+    { isLiked, likeCount },
+    (currentState) => ({
+      isLiked: !currentState.isLiked,
+      likeCount: currentState.isLiked ? likeCount - 1 : likeCount + 1,
+    })
   );
 
   async function action() {
@@ -21,9 +31,9 @@ export default function LikeButton({ id, isLiked }: LikeButtonProps) {
   }
 
   return (
-    <form action={action}>
-      <button className="btn btn-ghost">
-        {state ? (
+    <form action={action} className="flex flex-col items-center">
+      <button disabled={disabled}>
+        {state.isLiked ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -49,6 +59,7 @@ export default function LikeButton({ id, isLiked }: LikeButtonProps) {
           </svg>
         )}
       </button>
+      <span className="text-xs">{state.likeCount}</span>
     </form>
   );
 }

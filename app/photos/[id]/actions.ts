@@ -6,18 +6,21 @@ import { revalidateTag } from "next/cache";
 
 export async function getPhoto(id: number) {
   console.log("GET PHOTO HIT");
-  return await prisma.photo.findUnique({
+  return await prisma.photo.update({
     where: { id },
+    data: { views: { increment: 1 } },
     include: { user: { select: { avatar: true, id: true, username: true } } },
   });
 }
 
-export async function getIsLiked(id: number, userId: number) {
-  return Boolean(
+export async function getLikeStatus(id: number, userId: number) {
+  const isLiked = Boolean(
     await prisma.like.findUnique({
       where: { id: { photoId: id, userId } },
     })
   );
+  const likeCount = await prisma.like.count({ where: { photo: { id } } });
+  return { isLiked, likeCount };
 }
 
 export async function likePhoto(id: number) {

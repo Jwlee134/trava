@@ -10,20 +10,12 @@ import { notFound } from "next/navigation";
 import { IoMdImage } from "react-icons/io";
 import { IoCamera } from "react-icons/io5";
 import { RiCameraLensFill, RiMapPinTimeFill } from "react-icons/ri";
-import { getIsLiked, getPhoto } from "./actions";
+import { getLikeStatus, getPhoto } from "./actions";
 
-function getCachedPhoto(id: number) {
-  const operation = unstable_cache(getPhoto, ["photo-detail"], {
-    tags: [`photos-${id}`],
-  });
-  return operation(id);
-}
-
-async function getCachedIsLiked(id: number) {
+async function getCachedLikeStatus(id: number) {
   const session = await getSession();
-  if (!session.id) return false;
   const operation = unstable_cache(
-    (id) => getIsLiked(id, session.id!),
+    (id) => getLikeStatus(id, session.id ?? 0),
     ["like-status"],
     {
       tags: [`like-status-${session.id}`],
@@ -39,9 +31,9 @@ export default async function PhotoDetail({
 }) {
   const id = Number(params.id);
   if (isNaN(id)) return notFound();
-  const photo = await getCachedPhoto(id);
+  const photo = await getPhoto(id);
   if (!photo) return notFound();
-  const isLiked = await getCachedIsLiked(id);
+  const { isLiked, likeCount } = await getCachedLikeStatus(id);
   const session = await getSession();
 
   const date = photo.date
@@ -88,7 +80,30 @@ export default async function PhotoDetail({
                 <DeletePhotoForm id={id} />
               </EditPhotoModal>
             )}
-            {session.id && <LikeButton id={photo.id} isLiked={isLiked} />}
+            <div className="flex gap-4 opacity-80">
+              <div className="flex flex-col items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span className="text-xs">{photo.views}</span>
+              </div>
+              <LikeButton
+                disabled={!session.id}
+                id={photo.id}
+                isLiked={isLiked}
+                likeCount={likeCount}
+              />
+            </div>
           </div>
         </div>
         <div className="divider m-1"></div>

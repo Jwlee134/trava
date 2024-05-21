@@ -14,6 +14,7 @@ export default function Upload() {
             type="file"
             className={`file-input file-input-bordered w-full max-w-sm`}
             accept="image/*"
+            required
           />
           <input
             name="title"
