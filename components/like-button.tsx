@@ -1,7 +1,6 @@
 "use client";
 
 import { dislikePhoto, likePhoto } from "@/app/photos/[id]/actions";
-import { useParams } from "next/navigation";
 import { useOptimistic } from "react";
 
 interface LikeButtonProps {
@@ -10,7 +9,6 @@ interface LikeButtonProps {
 }
 
 export default function LikeButton({ id, isLiked }: LikeButtonProps) {
-  const params = useParams();
   const [state, dispatch] = useOptimistic(
     isLiked,
     (currentState) => !currentState

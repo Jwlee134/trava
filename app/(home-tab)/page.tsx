@@ -1,17 +1,14 @@
-import api from "@/libs/api";
-import { GetPhotosResponse } from "../api/v1/photos/route";
 import Image from "next/image";
 import Link from "next/link";
+import { getPhotos } from "./actions";
+import { unstable_cache } from "next/cache";
 
-async function getPhotos() {
-  return await api<GetPhotosResponse>("/photos", {
-    method: "GET",
-    next: { tags: ["photos"] },
-  });
-}
+const getCachedPhotos = unstable_cache(getPhotos, ["photos"], {
+  tags: ["photos"],
+});
 
 export default async function Home() {
-  const photos = await getPhotos();
+  const photos = await getCachedPhotos();
 
   return (
     <div className="grid grid-cols-3 gap-1">

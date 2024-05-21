@@ -1,31 +1,35 @@
-import { GetPhotoResponse } from "@/app/api/v1/photos/[id]/route";
 import DeletePhotoForm from "@/components/delete-photo-form";
 import EditPhotoForm from "@/components/edit-photo-form";
 import EditPhotoModal from "@/components/edit-photo-modal";
 import LikeButton from "@/components/like-button";
 import PhotoDetailMap from "@/components/photo-detail-map";
-import api from "@/libs/api";
 import getSession from "@/libs/session";
+import { unstable_cache } from "next/cache";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { IoMdImage } from "react-icons/io";
 import { IoCamera } from "react-icons/io5";
 import { RiCameraLensFill, RiMapPinTimeFill } from "react-icons/ri";
+import { getIsLiked, getPhoto } from "./actions";
 
-async function getPhoto(id: number) {
-  return await api<GetPhotoResponse>(`/photos/${id}`, {
-    method: "GET",
-    next: { tags: ["photo-detail", `photos-${id}`] },
+function getCachedPhoto(id: number) {
+  const operation = unstable_cache(getPhoto, ["photo-detail"], {
+    tags: [`photos-${id}`],
   });
+  return operation(id);
 }
 
-async function getIsLiked(id: number) {
+async function getCachedIsLiked(id: number) {
   const session = await getSession();
   if (!session.id) return false;
-  return await api<boolean>(`/photos/${id}/like?userId=${session.id}`, {
-    method: "GET",
-    next: { tags: [`like-status-${id}`] },
-  });
+  const operation = unstable_cache(
+    (id) => getIsLiked(id, session.id!),
+    ["like-status"],
+    {
+      tags: [`like-status-${session.id}`],
+    }
+  );
+  return operation(id);
 }
 
 export default async function PhotoDetail({
@@ -35,9 +39,9 @@ export default async function PhotoDetail({
 }) {
   const id = Number(params.id);
   if (isNaN(id)) return notFound();
-  const photo = await getPhoto(id);
+  const photo = await getCachedPhoto(id);
   if (!photo) return notFound();
-  const isLiked = await getIsLiked(id);
+  const isLiked = await getCachedIsLiked(id);
   const session = await getSession();
 
   const date = photo.date
@@ -84,7 +88,7 @@ export default async function PhotoDetail({
                 <DeletePhotoForm id={id} />
               </EditPhotoModal>
             )}
-            <LikeButton id={photo.id} isLiked={isLiked} />
+            {session.id && <LikeButton id={photo.id} isLiked={isLiked} />}
           </div>
         </div>
         <div className="divider m-1"></div>
