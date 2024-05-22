@@ -1,34 +1,14 @@
 import FullScreenPage from "@/components/full-screen-page";
-import ProtectedPage from "@/components/protected-page";
-import UploadPhotoButton from "@/components/upload-photo-button";
-import { upload } from "./actions";
+import getSession from "@/libs/session";
+import LoginRequired from "@/components/login-required";
+import UploadPhotoForm from "@/components/upload-photo-form";
 
-export default function Upload() {
+export default async function Page() {
+  const session = await getSession();
+
   return (
-    <ProtectedPage>
-      <FullScreenPage>
-        <form action={upload} className="flex flex-col gap-3 items-center">
-          <input
-            id="file"
-            name="photo"
-            type="file"
-            className={`file-input file-input-bordered w-full max-w-sm`}
-            accept="image/*"
-            required
-          />
-          <input
-            name="title"
-            placeholder="Title(optional)"
-            className="input input-bordered w-full max-w-sm"
-          />
-          <textarea
-            name="caption"
-            placeholder="Caption(optional)"
-            className="textarea textarea-bordered w-full max-w-sm"
-          ></textarea>
-          <UploadPhotoButton />
-        </form>
-      </FullScreenPage>
-    </ProtectedPage>
+    <FullScreenPage>
+      {!session.id ? <LoginRequired /> : <UploadPhotoForm />}
+    </FullScreenPage>
   );
 }

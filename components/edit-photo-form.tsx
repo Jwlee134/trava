@@ -1,48 +1,61 @@
-import prisma from "@/libs/db";
-import { revalidateTag } from "next/cache";
-import EditPhotoButton from "./edit-photo-button";
+"use client";
+
+import { useParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UpdatePhotoBody, updatePhoto } from "@/libs/api";
 
 interface EditPhotoFormProps {
-  id: number;
   title: string | null;
   caption: string | null;
 }
 
-export default function EditPhotoForm({
-  id,
-  title,
-  caption,
-}: EditPhotoFormProps) {
-  async function action(data: FormData) {
-    "use server";
-    const title = data.get("title") as string;
-    const caption = data.get("caption") as string;
-    await prisma.photo.update({
-      data: { title, caption },
-      where: { id },
-    });
-    revalidateTag(`photos-${id}`);
+export default function EditPhotoForm({ title, caption }: EditPhotoFormProps) {
+  const { id } = useParams();
+  const queryClient = useQueryClient();
+  const { register, handleSubmit } = useForm<UpdatePhotoBody>({
+    defaultValues: { title: title ?? "", caption: caption ?? "" },
+  });
+  const { mutate: update, isPending } = useMutation({
+    mutationFn: (data: UpdatePhotoBody) => updatePhoto(+id, data),
+    onSettled() {
+      queryClient.invalidateQueries({ queryKey: ["photo", +id] });
+      (document.getElementById("edit_modal") as HTMLDialogElement).close();
+    },
+  });
+
+  function onValid(data: UpdatePhotoBody) {
+    update(data);
   }
 
   return (
-    <form action={action}>
+    <form onSubmit={handleSubmit(onValid)}>
       <div className="flex flex-col gap-3">
         <h3 className="font-bold text-lg">Edit</h3>
         <input
-          name="title"
+          {...register("title")}
           placeholder="Title"
           className="input input-bordered w-full"
-          defaultValue={title ?? ""}
         />
         <textarea
-          name="caption"
+          {...register("caption")}
           placeholder="Caption"
           className="textarea textarea-bordered w-full"
-          defaultValue={caption ?? ""}
         ></textarea>
       </div>
       <div className="divider"></div>
-      <EditPhotoButton />
+      <button
+        disabled={isPending}
+        className={`btn btn-block mb-3 ${isPending && "btn-disabled"}`}
+      >
+        {isPending ? (
+          <>
+            <span className="loading loading-spinner"></span> Updating
+          </>
+        ) : (
+          "Update"
+        )}
+      </button>
     </form>
   );
 }

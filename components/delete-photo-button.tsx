@@ -1,16 +1,33 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
+import { deletePhoto } from "@/libs/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
 
 export default function DeletePhotoButton() {
-  const { pending } = useFormStatus();
+  const { id } = useParams();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useMutation({
+    mutationFn: deletePhoto,
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+      queryClient.invalidateQueries({ queryKey: ["profile", "my-photos"] });
+      router.back();
+    },
+  });
+
+  function handleClick() {
+    mutate(+id);
+  }
 
   return (
     <button
-      disabled={pending}
-      className={`btn btn-block btn-error ${pending && "btn-disabled"}`}
+      onClick={handleClick}
+      disabled={isPending}
+      className={`btn btn-block btn-error ${isPending && "btn-disabled"}`}
     >
-      {pending ? (
+      {isPending ? (
         <>
           <span className="loading loading-spinner"></span> Deleting
         </>

@@ -1,34 +1,26 @@
-import Image from "next/image";
-import Link from "next/link";
-import { getLikedPhotos } from "./actions";
-import FullScreenPage from "@/components/full-screen-page";
+import { getLikedPhotos } from "@/libs/api";
+import getSession from "@/libs/session";
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from "@tanstack/react-query";
+import { redirect } from "next/navigation";
+import { LikedPhotos } from "./liked-photos";
 
-export default async function LikedPhotos() {
-  const photos = await getLikedPhotos();
+export default async function Page() {
+  const queryClient = new QueryClient();
+  const session = await getSession();
+  if (!session.id) return redirect("/");
 
-  if (!photos.length)
-    return (
-      <FullScreenPage>
-        <span className="text-sm">You haven&apos;t liked photos.</span>
-      </FullScreenPage>
-    );
+  await queryClient.prefetchQuery({
+    queryKey: ["profile", "liked-photos"],
+    queryFn: () => getLikedPhotos(session.id!),
+  });
+
   return (
-    <div className="grid grid-cols-3 gap-1">
-      {photos.map(({ photo }) => (
-        <Link
-          key={photo.id}
-          href={`/photos/${photo.id}`}
-          className="relative aspect-square"
-        >
-          <Image
-            src={photo.url}
-            alt="photo"
-            fill
-            className="object-cover"
-            sizes="33vw"
-          />
-        </Link>
-      ))}
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <LikedPhotos id={session.id} />
+    </HydrationBoundary>
   );
 }

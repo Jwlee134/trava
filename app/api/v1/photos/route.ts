@@ -1,16 +1,35 @@
-"use server";
-
 import { uploadPhoto } from "@/libs/aws";
 import prisma from "@/libs/db";
-import getSession from "@/libs/session";
+import { Prisma } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
 import ExifReader from "exifreader";
-import { revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import getSession from "@/libs/session";
 
-export async function upload(data: FormData) {
-  const photo = data.get("photo") as File;
-  const title = data.get("title")?.toString() ?? null;
-  const caption = data.get("caption")?.toString() ?? null;
+export type GetPhotosReturnType = Prisma.PromiseReturnType<typeof getPhotos>;
+
+async function getPhotos() {
+  return await prisma.photo.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, url: true },
+  });
+}
+
+export async function GET() {
+  const photos = await getPhotos();
+
+  return NextResponse.json(photos);
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getSession();
+  if (!session.id)
+    return NextResponse.json({ success: false }, { status: 401 });
+
+  const formData = await request.formData();
+  const photo = formData.get("photo") as File;
+  const title = formData.get("title")?.toString();
+  const caption = formData.get("caption")?.toString();
+
   const buffer = await (photo as File).arrayBuffer();
   const exif = ExifReader.load(buffer);
 
@@ -58,7 +77,6 @@ export async function upload(data: FormData) {
   };
 
   const url = await uploadPhoto("photos", photo);
-  const session = await getSession();
 
   const newPhoto = await prisma.photo.create({
     data: {
@@ -72,7 +90,5 @@ export async function upload(data: FormData) {
     select: { id: true },
   });
 
-  revalidateTag("photos");
-
-  redirect(`/photos/${newPhoto.id}`);
+  return NextResponse.json({ id: newPhoto.id });
 }

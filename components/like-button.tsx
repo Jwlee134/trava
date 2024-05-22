@@ -1,39 +1,66 @@
 "use client";
 
-import { dislikePhoto, likePhoto } from "@/app/photos/[id]/actions";
-import { useOptimistic } from "react";
+import { deleteLike, getPhotoLikeStatus, postLike } from "@/libs/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 
 interface LikeButtonProps {
   disabled: boolean;
-  id: number;
-  isLiked: boolean;
-  likeCount: number;
 }
 
-export default function LikeButton({
-  disabled,
-  id,
-  isLiked,
-  likeCount,
-}: LikeButtonProps) {
-  const [state, dispatch] = useOptimistic(
-    { isLiked, likeCount },
-    (currentState) => ({
-      isLiked: !currentState.isLiked,
-      likeCount: currentState.isLiked ? likeCount - 1 : likeCount + 1,
-    })
-  );
+export default function LikeButton({ disabled }: LikeButtonProps) {
+  const { id } = useParams();
+  const queryKey = ["photo", +id, "like-status"];
 
-  async function action() {
-    dispatch(null);
-    if (isLiked) await dislikePhoto(id);
-    else await likePhoto(id);
+  const { data } = useQuery({
+    queryKey,
+    queryFn: () => getPhotoLikeStatus(+id),
+  });
+
+  const queryClient = useQueryClient();
+
+  async function onMutate(isPostLike: boolean) {
+    await queryClient.cancelQueries({ queryKey });
+    const prevState = queryClient.getQueryData(queryKey);
+    queryClient.setQueryData(
+      queryKey,
+      ({ isLiked, likeCount }: { isLiked: boolean; likeCount: number }) => ({
+        isLiked: !isLiked,
+        likeCount: isPostLike ? likeCount + 1 : likeCount - 1,
+      })
+    );
+    return prevState;
+  }
+  function onError(c: any) {
+    queryClient.setQueryData(queryKey, c.prevState);
+  }
+  function onSettled() {
+    queryClient.invalidateQueries({ queryKey });
+    queryClient.invalidateQueries({ queryKey: ["profile", "liked-photos"] });
+  }
+
+  const { mutate: likePhoto } = useMutation({
+    mutationFn: postLike,
+    onMutate: () => onMutate(true),
+    onError: (err, newData, context: any) => onError(context),
+    onSettled,
+  });
+  const { mutate: dislikePhoto } = useMutation({
+    mutationFn: deleteLike,
+    onMutate: () => onMutate(false),
+    onError: (err, newData, context: any) => onError(context),
+    onSettled,
+  });
+
+  async function handleClick() {
+    if (data?.isLiked) dislikePhoto(+id);
+    else likePhoto(+id);
   }
 
   return (
-    <form action={action} className="flex flex-col items-center">
-      <button disabled={disabled}>
-        {state.isLiked ? (
+    <div className="flex flex-col items-center">
+      <button disabled={disabled} onClick={handleClick}>
+        {data?.isLiked ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -59,7 +86,7 @@ export default function LikeButton({
           </svg>
         )}
       </button>
-      <span className="text-xs">{state.likeCount}</span>
-    </form>
+      <span className="text-xs">{data?.likeCount}</span>
+    </div>
   );
 }

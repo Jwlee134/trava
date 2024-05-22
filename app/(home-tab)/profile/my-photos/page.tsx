@@ -1,34 +1,26 @@
-import Image from "next/image";
-import Link from "next/link";
-import { getMyPhotos } from "./actions";
-import FullScreenPage from "@/components/full-screen-page";
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from "@tanstack/react-query";
+import { getMyPhotos } from "@/libs/api";
+import { MyPhotos } from "./my-photos";
+import getSession from "@/libs/session";
+import { redirect } from "next/navigation";
 
-export default async function MyPhotos() {
-  const photos = await getMyPhotos();
+export default async function Page() {
+  const queryClient = new QueryClient();
+  const session = await getSession();
+  if (!session.id) return redirect("/");
 
-  if (!photos.length)
-    return (
-      <FullScreenPage>
-        <span className="text-sm">You haven&apos;t uploaded photos.</span>
-      </FullScreenPage>
-    );
+  await queryClient.prefetchQuery({
+    queryKey: ["profile", "my-photos"],
+    queryFn: () => getMyPhotos(session.id!),
+  });
+
   return (
-    <div className="grid grid-cols-3 gap-1">
-      {photos.map(({ id, url }) => (
-        <Link
-          key={id}
-          href={`/photos/${id}`}
-          className="relative aspect-square"
-        >
-          <Image
-            src={url}
-            alt="photo"
-            fill
-            className="object-cover"
-            sizes="33vw"
-          />
-        </Link>
-      ))}
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <MyPhotos id={session.id} />
+    </HydrationBoundary>
   );
 }

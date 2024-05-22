@@ -3,6 +3,7 @@ import { Nunito } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import localFont from "next/font/local";
+import Providers from "@/components/provider";
 
 const nunito = Nunito({ subsets: ["latin"] });
 const poetsenone = localFont({ src: "./poetsenone.ttf" });
@@ -20,12 +21,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="navbar bg-base-100 fixed top-0 px-4 z-50">
-          <Link href="/" className={`${poetsenone.className} text-2xl`}>
-            Trava
-          </Link>
-        </header>
-        <main className={`${nunito.className} pt-16`}>{children}</main>
+        <Providers>
+          <header className="navbar bg-base-100 fixed top-0 px-4 z-50">
+            <Link href="/" className={`${poetsenone.className} text-2xl`}>
+              Trava
+            </Link>
+          </header>
+          <main className={`${nunito.className} pt-16`}>{children}</main>
+        </Providers>
       </body>
     </html>
   );
