@@ -7,6 +7,11 @@ import { getMyPhotos } from "@/libs/api";
 import { MyPhotos } from "./my-photos";
 import getSession from "@/libs/session";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "My Photos",
+};
 
 export default async function Page() {
   const queryClient = new QueryClient();

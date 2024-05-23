@@ -7,6 +7,11 @@ import {
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { LikedPhotos } from "./liked-photos";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Liked Photos",
+};
 
 export default async function Page() {
   const queryClient = new QueryClient();

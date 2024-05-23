@@ -5,6 +5,11 @@ import {
 } from "@tanstack/react-query";
 import { getPhotos } from "@/libs/api";
 import Home from "./home";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+};
 
 export default async function Page() {
   const queryClient = new QueryClient();

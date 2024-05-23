@@ -8,6 +8,11 @@ import { Profile } from "./profile";
 import getSession from "@/libs/session";
 import FullScreenPage from "@/components/full-screen-page";
 import LoginRequired from "@/components/login-required";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Profile",
+};
 
 export default async function Page() {
   const queryClient = new QueryClient();
