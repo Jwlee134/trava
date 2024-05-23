@@ -7,7 +7,7 @@ import getSession from "@/libs/session";
 
 export type GetPhotosReturnType = Prisma.PromiseReturnType<typeof getPhotos>;
 
-async function getPhotos(cursor: number) {
+async function getPhotos(cursor: string) {
   const data = await prisma.photo.findMany({
     orderBy: { createdAt: "desc" },
     select: { id: true, url: true },
@@ -21,7 +21,7 @@ async function getPhotos(cursor: number) {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const cursor = searchParams.get("cursor")!;
-  const photos = await getPhotos(+cursor);
+  const photos = await getPhotos(cursor);
 
   return NextResponse.json(photos);
 }

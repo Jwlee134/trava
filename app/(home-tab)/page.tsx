@@ -17,7 +17,7 @@ export default async function Page() {
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["photos"],
     queryFn: getPhotos,
-    initialPageParam: 0,
+    initialPageParam: "",
     getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
     pages: 1,
   });

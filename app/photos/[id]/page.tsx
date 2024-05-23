@@ -40,8 +40,7 @@ export async function generateMetadata(
 }
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
-  if (isNaN(id)) return notFound();
+  const id = params.id;
   const queryClient = new QueryClient();
   const session = await getSession();
 

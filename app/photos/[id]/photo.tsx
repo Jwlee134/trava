@@ -22,8 +22,8 @@ interface PhotoProps {
 export default function Photo({ session }: PhotoProps) {
   const { id } = useParams();
   const { data: photo } = useQuery({
-    queryKey: ["photo", +id],
-    queryFn: () => getPhoto(+id),
+    queryKey: ["photo", id],
+    queryFn: () => getPhoto(id as string),
   });
 
   if (!photo) return null;

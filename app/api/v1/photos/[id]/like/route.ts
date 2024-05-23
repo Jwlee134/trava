@@ -7,13 +7,13 @@ export type GetLikeStatusReturnType = Prisma.PromiseReturnType<
   typeof getLikeStatus
 >;
 
-async function getLikeStatus(id: number) {
+async function getLikeStatus(id: string) {
   let isLiked = false;
   const session = await getSession();
   if (session.id) {
     isLiked = Boolean(
-      await prisma.like.findUnique({
-        where: { id: { photoId: id, userId: session.id } },
+      await prisma.like.findFirst({
+        where: { userId: session.id, photoId: id },
       })
     );
   }
@@ -25,7 +25,7 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const status = await getLikeStatus(+params.id);
+  const status = await getLikeStatus(params.id);
 
   return NextResponse.json(status);
 }
@@ -39,7 +39,7 @@ export async function POST(
     return NextResponse.json({ success: false }, { status: 401 });
 
   await prisma.like.create({
-    data: { photoId: +params.id, userId: session.id },
+    data: { photoId: params.id, userId: session.id },
   });
 
   return NextResponse.json({ success: true });
@@ -53,8 +53,8 @@ export async function DELETE(
   if (!session.id)
     return NextResponse.json({ success: false }, { status: 401 });
 
-  await prisma.like.delete({
-    where: { id: { photoId: +params.id, userId: session.id } },
+  await prisma.like.deleteMany({
+    where: { photoId: params.id, userId: session.id },
   });
 
   return NextResponse.json({ success: true });

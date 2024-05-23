@@ -8,7 +8,7 @@ import axios from "axios";
 
 const api = axios.create({ baseURL: `${process.env.NEXT_PUBLIC_URL}/api/v1` });
 
-export async function getPhotos({ pageParam }: { pageParam: number }) {
+export async function getPhotos({ pageParam }: { pageParam: string }) {
   return (await api.get<GetPhotosReturnType>(`/photos?cursor=${pageParam}`))
     .data;
 }
@@ -17,19 +17,19 @@ export async function postPhoto(body: FormData) {
   return (await api.post<{ id: number }>("/photos", body)).data;
 }
 
-export async function getPhoto(id: number) {
+export async function getPhoto(id: string) {
   return (await api.get<GetPhotoReturnType>(`/photos/${id}`)).data;
 }
 
-export async function getPhotoLikeStatus(id: number) {
+export async function getPhotoLikeStatus(id: string) {
   return (await api.get<GetLikeStatusReturnType>(`/photos/${id}/like`)).data;
 }
 
-export async function postLike(id: number) {
+export async function postLike(id: string) {
   return (await api.post(`/photos/${id}/like`)).data;
 }
 
-export async function deleteLike(id: number) {
+export async function deleteLike(id: string) {
   return (await api.delete(`/photos/${id}/like`)).data;
 }
 
@@ -38,25 +38,25 @@ export interface UpdatePhotoBody {
   caption: string;
 }
 
-export async function updatePhoto(id: number, data: UpdatePhotoBody) {
+export async function updatePhoto(id: string, data: UpdatePhotoBody) {
   return (await api.patch(`/photos/${id}`, data)).data;
 }
 
-export async function deletePhoto(id: number) {
+export async function deletePhoto(id: string) {
   return (await api.delete(`/photos/${id}`)).data;
 }
 
-export async function getProfile(id: number) {
+export async function getProfile(id: string) {
   return (await api.get<GetProfileReturnType>(`/profile?id=${id}`)).data;
 }
 
-export async function getLikedPhotos(id: number) {
+export async function getLikedPhotos(id: string) {
   return (
     await api.get<GetLikedPhotosReturnType>(`/profile/liked-photos?id=${id}`)
   ).data;
 }
 
-export async function getMyPhotos(id: number) {
+export async function getMyPhotos(id: string) {
   return (await api.get<GetMyPhotosReturnType>(`/profile/my-photos?id=${id}`))
     .data;
 }

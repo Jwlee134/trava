@@ -18,7 +18,7 @@ export default function DeletePhotoButton() {
   });
 
   function handleClick() {
-    mutate(+id);
+    mutate(id as string);
   }
 
   return (

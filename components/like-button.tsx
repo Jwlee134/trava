@@ -10,11 +10,11 @@ interface LikeButtonProps {
 
 export default function LikeButton({ disabled }: LikeButtonProps) {
   const { id } = useParams();
-  const queryKey = ["photo", +id, "like-status"];
+  const queryKey = ["photo", id, "like-status"];
 
   const { data } = useQuery({
     queryKey,
-    queryFn: () => getPhotoLikeStatus(+id),
+    queryFn: () => getPhotoLikeStatus(id as string),
   });
 
   const queryClient = useQueryClient();
@@ -53,8 +53,8 @@ export default function LikeButton({ disabled }: LikeButtonProps) {
   });
 
   async function handleClick() {
-    if (data?.isLiked) dislikePhoto(+id);
-    else likePhoto(+id);
+    if (data?.isLiked) dislikePhoto(id as string);
+    else likePhoto(id as string);
   }
 
   return (

@@ -11,7 +11,7 @@ export default function Home() {
   const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["photos"],
     queryFn: getPhotos,
-    initialPageParam: 0,
+    initialPageParam: "",
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
