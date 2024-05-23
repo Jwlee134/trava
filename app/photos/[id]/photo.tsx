@@ -36,17 +36,17 @@ export default function Photo({ session }: PhotoProps) {
     : "No date information";
 
   return (
-    <>
+    <div className="lg:grid lg:grid-cols-2">
       <Image
         src={photo.url}
         alt={photo.title ?? "Photo"}
         width={photo.width}
         height={photo.height}
-        sizes="100vw"
-        className="w-full h-auto"
+        sizes="(max-width: 1024px) 100vw, 50vw"
+        className="w-full h-auto lg:self-center lg:rounded-lg"
         priority
       />
-      <div className="p-3">
+      <div className="p-3 lg:self-center lg:px-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="avatar">
@@ -61,7 +61,7 @@ export default function Photo({ session }: PhotoProps) {
             </div>
             <span>{photo.user.username}</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             {(session.id === photo.user.id || session.isAdmin) && (
               <EditPhotoModal>
                 <EditPhotoForm title={photo.title} caption={photo.caption} />
@@ -138,6 +138,6 @@ export default function Photo({ session }: PhotoProps) {
           />
         )}
       </div>
-    </>
+    </div>
   );
 }

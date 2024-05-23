@@ -10,7 +10,7 @@ export default function EditPhotoModal({ children }: { children: ReactNode }) {
   return (
     <>
       <div>
-        <button className="btn btn-ghost" onClick={handleEditClick}>
+        <button onClick={handleEditClick}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

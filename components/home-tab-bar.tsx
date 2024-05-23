@@ -1,6 +1,5 @@
 "use client";
 
-import { cls } from "@/libs/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -22,27 +21,46 @@ export default function HomeTabBar() {
   const isProfile = pathname === "/profile";
 
   return (
-    <div className="btm-nav">
-      <Link href="/" className={cls(isHome ? "active" : "")}>
+    <div
+      className="max-[1024px]:z-50 max-[1024px]:btm-nav
+      max-[1024px]:max-w-screen-lg max-[1024px]:mx-auto
+      lg:p-1.5 lg:fixed lg:w-48"
+    >
+      <Link
+        href="/"
+        className="flex items-center lg:hover:bg-base-200 lg:transition-colors
+        lg:rounded-md lg:p-3"
+      >
         {isHome ? (
           <IoHome size={TAB_ICON_SIZE} />
         ) : (
           <IoHomeOutline size={TAB_ICON_SIZE} />
         )}
+        <span className="hidden lg:block lg:ml-2">Home</span>
       </Link>
-      <Link href="/upload" className={cls(isUpload ? "active" : "")}>
+      <Link
+        href="/upload"
+        className="flex items-center lg:hover:bg-base-200 lg:transition-colors
+        lg:rounded-md lg:p-3"
+      >
         {isUpload ? (
           <IoCloudUpload size={TAB_ICON_SIZE} />
         ) : (
           <IoCloudUploadOutline size={TAB_ICON_SIZE} />
         )}
+        <span className="hidden lg:block lg:ml-2">Upload</span>
       </Link>
-      <Link href="/profile" className={cls(isProfile ? "active" : "")}>
+      <Link
+        href="/profile"
+        className="flex items-center lg:hover:bg-base-200 lg:transition-colors
+        lg:rounded-md lg:p-3"
+      >
         {isProfile ? (
           <IoPerson size={TAB_ICON_SIZE} />
         ) : (
           <IoPersonOutline size={TAB_ICON_SIZE} />
         )}
+        <span className="hidden lg:block lg:ml-2">Profile</span>
       </Link>
     </div>
   );

@@ -42,20 +42,20 @@ export default function EditPhotoForm({ title, caption }: EditPhotoFormProps) {
           placeholder="Caption"
           className="textarea textarea-bordered w-full"
         ></textarea>
+        <button
+          disabled={isPending}
+          className={`btn btn-block ${isPending && "btn-disabled"}`}
+        >
+          {isPending ? (
+            <>
+              <span className="loading loading-spinner"></span> Updating
+            </>
+          ) : (
+            "Update"
+          )}
+        </button>
       </div>
       <div className="divider"></div>
-      <button
-        disabled={isPending}
-        className={`btn btn-block mb-3 ${isPending && "btn-disabled"}`}
-      >
-        {isPending ? (
-          <>
-            <span className="loading loading-spinner"></span> Updating
-          </>
-        ) : (
-          "Update"
-        )}
-      </button>
     </form>
   );
 }

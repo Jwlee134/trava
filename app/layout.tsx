@@ -20,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <head>
+        <meta name="viewport" content="viewport-fit=cover" />
+      </head>
+      <body className="max-w-screen-lg mx-auto">
         <Providers>
           <header className="navbar bg-base-100 fixed top-0 px-4 z-50">
             <Link href="/" className={`${poetsenone.className} text-2xl`}>

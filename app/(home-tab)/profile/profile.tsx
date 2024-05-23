@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
+import { IoLogOut } from "react-icons/io5";
 
 export function Profile({ id }: { id: number }) {
   const router = useRouter();
@@ -32,7 +33,7 @@ export function Profile({ id }: { id: number }) {
         </div>
         <div className="text-2xl">{user?.username}</div>
       </div>
-      <div className="p-4 flex flex-col gap-4">
+      <div className="p-4 flex flex-col gap-4 max-w-screen-sm mx-auto">
         <ul className="menu bg-base-200 rounded-box">
           <li>
             <Link href="/profile/liked-photos">
@@ -65,9 +66,14 @@ export function Profile({ id }: { id: number }) {
             </Link>
           </li>
         </ul>
-        <button onClick={() => mutate()} className="btn btn-block rounded-box">
-          Log out
-        </button>
+        <ul className="menu bg-base-200 rounded-box">
+          <li>
+            <button onClick={() => mutate()}>
+              <IoLogOut size={24} />
+              Log out
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   );
