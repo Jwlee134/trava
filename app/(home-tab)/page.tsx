@@ -9,9 +9,12 @@ import Home from "./home";
 export default async function Page() {
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
+  await queryClient.prefetchInfiniteQuery({
     queryKey: ["photos"],
     queryFn: getPhotos,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+    pages: 1,
   });
 
   return (

@@ -8,8 +8,9 @@ import axios from "axios";
 
 const api = axios.create({ baseURL: `${process.env.NEXT_PUBLIC_URL}/api/v1` });
 
-export async function getPhotos() {
-  return (await api.get<GetPhotosReturnType>("/photos")).data;
+export async function getPhotos({ pageParam }: { pageParam: number }) {
+  return (await api.get<GetPhotosReturnType>(`/photos?cursor=${pageParam}`))
+    .data;
 }
 
 export async function postPhoto(body: FormData) {
