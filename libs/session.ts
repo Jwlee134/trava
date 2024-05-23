@@ -1,7 +1,7 @@
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 
-interface SessionData {
+export interface SessionData {
   id?: number;
   isAdmin?: boolean;
 }

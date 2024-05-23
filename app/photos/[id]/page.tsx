@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Photo currentUserId={session.id} />
+      <Photo session={{ ...session }} />
     </HydrationBoundary>
   );
 }

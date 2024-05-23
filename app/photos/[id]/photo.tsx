@@ -6,7 +6,9 @@ import EditPhotoModal from "@/components/edit-photo-modal";
 import LikeButton from "@/components/like-button";
 import PhotoDetailMap from "@/components/photo-detail-map";
 import { getPhoto } from "@/libs/api";
+import { SessionData } from "@/libs/session";
 import { useQuery } from "@tanstack/react-query";
+import { IronSession } from "iron-session";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { IoMdImage } from "react-icons/io";
@@ -14,10 +16,10 @@ import { IoCamera } from "react-icons/io5";
 import { RiCameraLensFill, RiMapPinTimeFill } from "react-icons/ri";
 
 interface PhotoProps {
-  currentUserId: number | undefined;
+  session: IronSession<SessionData>;
 }
 
-export default function Photo({ currentUserId }: PhotoProps) {
+export default function Photo({ session }: PhotoProps) {
   const { id } = useParams();
   const { data: photo } = useQuery({
     queryKey: ["photo", +id],
@@ -60,7 +62,7 @@ export default function Photo({ currentUserId }: PhotoProps) {
             <span>{photo.user.username}</span>
           </div>
           <div className="flex items-center">
-            {currentUserId === photo.user.id && (
+            {(session.id === photo.user.id || session.isAdmin) && (
               <EditPhotoModal>
                 <EditPhotoForm title={photo.title} caption={photo.caption} />
                 <DeletePhotoButton />
@@ -83,7 +85,7 @@ export default function Photo({ currentUserId }: PhotoProps) {
                 </svg>
                 <span className="text-xs">{photo.views}</span>
               </div>
-              <LikeButton disabled={!currentUserId} />
+              <LikeButton disabled={!session.id} />
             </div>
           </div>
         </div>
