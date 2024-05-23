@@ -1,7 +1,7 @@
 "use client";
 
 import { postPhoto } from "@/libs/api";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
@@ -12,6 +12,7 @@ interface Form {
 }
 
 export default function UploadPhotoForm() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const {
     register,
@@ -21,6 +22,7 @@ export default function UploadPhotoForm() {
   const { mutate, isPending } = useMutation({
     mutationFn: postPhoto,
     onSettled(data) {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
       router.push(`/photos/${data?.id}`);
     },
   });

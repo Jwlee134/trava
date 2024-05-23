@@ -7,7 +7,7 @@ import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
 import { IoLogOut } from "react-icons/io5";
 
-export function Profile({ id }: { id: number }) {
+export function Profile({ id }: { id: string }) {
   const router = useRouter();
   const { data: user } = useQuery({
     queryKey: ["profile"],

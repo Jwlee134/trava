@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 
-export function LikedPhotos({ id }: { id: number }) {
+export function LikedPhotos({ id }: { id: string }) {
   const { data } = useQuery({
     queryKey: ["profile", "liked-photos"],
     queryFn: () => getLikedPhotos(id),

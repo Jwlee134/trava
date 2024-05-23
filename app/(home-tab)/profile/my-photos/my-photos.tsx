@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 
-export function MyPhotos({ id }: { id: number }) {
+export function MyPhotos({ id }: { id: string }) {
   const { data } = useQuery({
     queryKey: ["profile", "my-photos"],
     queryFn: () => getMyPhotos(id),
