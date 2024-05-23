@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   let user = await prisma.user.findUnique({
     where: { kakaoId: String(data.id) },
-    select: { id: true },
+    select: { id: true, isAdmin: true },
   });
   if (!user) {
     user = await prisma.user.create({
@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
         username: data.properties.nickname,
         avatar: data.properties.profile_image,
       },
-      select: { id: true },
+      select: { id: true, isAdmin: true },
     });
   }
 
-  await setSession(user.id);
+  await setSession(user.id, user.isAdmin);
 
   return Response.json({ success: true });
 }

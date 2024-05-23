@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
   let user = await prisma.user.findUnique({
     where: { googleId: data.id },
-    select: { id: true },
+    select: { id: true, isAdmin: true },
   });
   if (!user) {
     user = await prisma.user.create({
@@ -40,11 +40,11 @@ export async function POST(request: NextRequest) {
         username: data.name,
         avatar: data.picture,
       },
-      select: { id: true },
+      select: { id: true, isAdmin: true },
     });
   }
 
-  await setSession(user.id);
+  await setSession(user.id, user.isAdmin);
 
   return Response.json({ success: true });
 }

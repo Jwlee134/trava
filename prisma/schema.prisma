@@ -23,6 +23,7 @@ model User {
   updatedAt DateTime @updatedAt
   photos    Photo[]
   likes     Like[]
+  isAdmin   Boolean  @default(false)
 }
 
 model Photo {
