@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import {
   HydrationBoundary,
   QueryClient,
@@ -7,27 +6,24 @@ import {
 import { getPhoto, getPhotoLikeStatus } from "@/libs/api";
 import Photo from "./photo";
 import getSession from "@/libs/session";
-import { Metadata, ResolvingMetadata } from "next";
-import { GetPhotoMetadataReturnType } from "@/app/api/v1/photos/[id]/metadata/route";
+import { Metadata } from "next";
+import prisma from "@/libs/db";
 
 type Props = {
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export async function generateMetadata(
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const id = params.id;
 
-  const photo: GetPhotoMetadataReturnType = await fetch(
-    `${process.env.NEXT_PUBLIC_URL}/api/v1/photos/${id}/metadata`,
-    {
-      method: "GET",
-      next: { tags: [`photo-metadata-${id}`] },
-    }
-  ).then((res) => res.json());
+  const photo = await prisma.photo.findUnique({
+    where: { id },
+    select: { id: true, url: true, title: true, caption: true },
+  });
 
   return {
     title: photo?.title || "No title",
