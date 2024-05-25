@@ -54,7 +54,7 @@ export default function Home() {
                   alt="photo"
                   fill
                   className="object-cover"
-                  sizes="33vw"
+                  sizes="(max-width: 1024px) 33vw, 275px"
                   priority
                 />
               </Link>
