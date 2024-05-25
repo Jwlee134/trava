@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import ExifReader from "exifreader";
 import getSession from "@/libs/session";
+import sharp from "sharp";
 
 export type GetPhotosReturnType = Prisma.PromiseReturnType<typeof getPhotos>;
 
@@ -82,7 +83,15 @@ export async function POST(request: NextRequest) {
       : null,
   };
 
-  const url = await uploadPhoto("photos", photo);
+  const key = `photos/${photo.size}-${Date.now()}-${
+    photo.name.split(".")[0]
+  }.webp`;
+  const compressedBuffer = await sharp(buffer)
+    .toFormat("webp")
+    .resize(1280)
+    .toBuffer();
+
+  const url = await uploadPhoto(compressedBuffer, key);
 
   const newPhoto = await prisma.photo.create({
     data: {
