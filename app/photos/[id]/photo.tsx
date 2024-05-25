@@ -56,6 +56,7 @@ export default function Photo({ session }: PhotoProps) {
                   alt={photo.user.username}
                   width={48}
                   height={48}
+                  priority
                 />
               </div>
             </div>
