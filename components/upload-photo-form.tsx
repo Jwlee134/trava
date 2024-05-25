@@ -46,7 +46,7 @@ export default function UploadPhotoForm() {
       setError("photo", { message: "Photo size should be less than 5MB." });
       e.target.value = "";
     } else {
-      clearErrors("photo");
+      if (errors.photo?.message) clearErrors("photo");
       setValue("photo", file);
     }
   }
@@ -54,13 +54,13 @@ export default function UploadPhotoForm() {
   return (
     <form
       onSubmit={handleSubmit(onValid)}
-      className="flex flex-col gap-3 items-center"
+      className="flex flex-col gap-3 items-center p-3"
     >
       <input
         id="file"
         type="file"
-        className={`file-input file-input-bordered w-full max-w-sm ${
-          errors.photo?.message && "input-error"
+        className={`file-input file-input-bordered w-full max-w-xs ${
+          errors.photo?.message ? "input-error" : ""
         }`}
         accept="image/*"
         onChange={handleChange}
@@ -72,16 +72,16 @@ export default function UploadPhotoForm() {
       <input
         {...register("title")}
         placeholder="Title(optional)"
-        className="input input-bordered w-full max-w-sm"
+        className="input input-bordered w-full max-w-xs"
       />
       <textarea
         {...register("caption")}
         placeholder="Caption(optional)"
-        className="textarea textarea-bordered w-full max-w-sm"
+        className="textarea textarea-bordered w-full max-w-xs"
       ></textarea>
       <button
         disabled={isPending}
-        className={`btn w-full max-w-sm ${isPending && "btn-disabled"}`}
+        className={`btn w-full max-w-xs ${isPending && "btn-disabled"}`}
       >
         {isPending ? (
           <>
