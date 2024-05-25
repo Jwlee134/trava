@@ -34,7 +34,7 @@ export default function LikeButton({ disabled }: LikeButtonProps) {
   function onError(c: any) {
     queryClient.setQueryData(queryKey, c.prevState);
   }
-  function onSettled() {
+  function onSuccess() {
     queryClient.invalidateQueries({ queryKey });
     queryClient.invalidateQueries({ queryKey: ["profile", "liked-photos"] });
   }
@@ -43,13 +43,13 @@ export default function LikeButton({ disabled }: LikeButtonProps) {
     mutationFn: postLike,
     onMutate: () => onMutate(true),
     onError: (err, newData, context: any) => onError(context),
-    onSettled,
+    onSuccess,
   });
   const { mutate: dislikePhoto } = useMutation({
     mutationFn: deleteLike,
     onMutate: () => onMutate(false),
     onError: (err, newData, context: any) => onError(context),
-    onSettled,
+    onSuccess,
   });
 
   async function handleClick() {

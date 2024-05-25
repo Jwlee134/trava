@@ -10,7 +10,7 @@ export default function DeletePhotoButton() {
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: deletePhoto,
-    onSettled: () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["photos"] });
       queryClient.invalidateQueries({ queryKey: ["profile", "my-photos"] });
       router.back();

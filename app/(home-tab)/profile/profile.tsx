@@ -15,7 +15,7 @@ export function Profile({ id }: { id: string }) {
   });
   const { mutate } = useMutation({
     mutationFn: logout,
-    onSettled: () => {
+    onSuccess: () => {
       router.push("/");
       router.refresh();
     },

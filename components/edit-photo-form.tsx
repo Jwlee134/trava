@@ -18,7 +18,7 @@ export default function EditPhotoForm({ title, caption }: EditPhotoFormProps) {
   });
   const { mutate: update, isPending } = useMutation({
     mutationFn: (data: UpdatePhotoBody) => updatePhoto(id as string, data),
-    onSettled() {
+    onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["photo", id] });
       (document.getElementById("edit_modal") as HTMLDialogElement).close();
     },
