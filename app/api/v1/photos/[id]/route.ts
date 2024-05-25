@@ -1,3 +1,4 @@
+import { deletePhoto } from "@/libs/aws";
 import prisma from "@/libs/db";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -39,7 +40,11 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  await prisma.photo.delete({ where: { id: params.id } });
+  const photo = await prisma.photo.delete({
+    where: { id: params.id },
+    select: { url: true },
+  });
+  await deletePhoto(photo.url.split("amazonaws.com/")[1]);
 
   return NextResponse.json({ success: true });
 }
