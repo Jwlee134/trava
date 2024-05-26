@@ -56,6 +56,7 @@ export default function Home() {
                   className="object-cover"
                   sizes="(max-width: 1024px) 33vw, 275px"
                   priority
+                  quality={50}
                 />
               </Link>
             ))}
