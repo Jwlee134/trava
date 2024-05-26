@@ -12,10 +12,10 @@ async function getPhotos(cursor: string) {
   const data = await prisma.photo.findMany({
     orderBy: { createdAt: "desc" },
     select: { id: true, url: true },
-    take: 20,
+    take: 30,
     ...(cursor && { skip: 1, cursor: { id: cursor } }),
   });
-  const nextCursor = data.length < 20 ? null : data[data.length - 1].id;
+  const nextCursor = data.length < 30 ? null : data[data.length - 1].id;
   return { data, nextCursor };
 }
 

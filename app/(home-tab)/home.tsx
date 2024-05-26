@@ -8,13 +8,12 @@ import { Fragment, useEffect, useRef } from "react";
 
 export default function Home() {
   const trigger = useRef<HTMLSpanElement>(null);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["photos"],
-      queryFn: getPhotos,
-      initialPageParam: "",
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    });
+  const { data, fetchNextPage, hasNextPage } = useInfiniteQuery({
+    queryKey: ["photos"],
+    queryFn: getPhotos,
+    initialPageParam: "",
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
 
   useEffect(() => {
     if (!hasNextPage) return;
@@ -29,7 +28,7 @@ export default function Home() {
           fetchNextPage();
         }
       },
-      { rootMargin: "100px 0px" }
+      { rootMargin: "200px 0px" }
     );
     if (trigger.current) observer.observe(trigger.current);
 
@@ -60,10 +59,6 @@ export default function Home() {
                 />
               </Link>
             ))}
-            {isFetchingNextPage &&
-              Array.from({ length: 10 }, (v, i) => i).map((i) => (
-                <div key={i} className="skeleton aspect-square" />
-              ))}
           </Fragment>
         ))}
       </div>
