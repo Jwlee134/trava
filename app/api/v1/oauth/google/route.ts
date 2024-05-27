@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     headers: { Authorization: `Bearer ${access_token}` },
   });
 
-  let user = await prisma.user.findUnique({
+  let user = await prisma.user.findFirst({
     where: { googleId: data.id },
     select: { id: true, isAdmin: true },
   });
