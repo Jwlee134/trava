@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   title: "Home",
 };
 
+export const revalidate = 0;
+
 export default async function Page() {
   const queryClient = new QueryClient();
 
