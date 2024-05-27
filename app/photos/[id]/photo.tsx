@@ -32,6 +32,7 @@ export default function Photo({ session }: PhotoProps) {
     ? new Intl.DateTimeFormat("en-US", {
         dateStyle: "full",
         timeStyle: "medium",
+        timeZone: "GMT",
       }).format(new Date(photo.date))
     : "No date information";
 
