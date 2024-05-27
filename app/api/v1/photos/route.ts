@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
   const compressedBuffer = await sharp(buffer)
     .toFormat("webp")
     .resize(1280)
+    .withMetadata()
     .toBuffer();
 
   const url = await uploadPhoto(compressedBuffer, key);
