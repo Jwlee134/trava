@@ -39,7 +39,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 gap-1 lg:rounded-lg lg:overflow-hidden">
         {data?.pages.map((photos, i) => (
           <Fragment key={i}>
             {photos.data.map((photo) => (

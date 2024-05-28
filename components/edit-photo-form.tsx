@@ -31,7 +31,7 @@ export default function EditPhotoForm({ title, caption }: EditPhotoFormProps) {
   return (
     <form onSubmit={handleSubmit(onValid)}>
       <div className="flex flex-col gap-3">
-        <h3 className="font-bold text-lg">Edit</h3>
+        <h3 className="font-bold text-lg">Edit Photo</h3>
         <input
           {...register("title")}
           placeholder="Title"
