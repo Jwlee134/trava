@@ -1,5 +1,6 @@
 "use client";
 
+import Comments from "@/components/comments";
 import DeletePhotoButton from "@/components/delete-photo-button";
 import EditPhotoForm from "@/components/edit-photo-form";
 import EditPhotoModal from "@/components/edit-photo-modal";
@@ -44,7 +45,7 @@ export default function Photo({ session }: PhotoProps) {
         width={photo.width}
         height={photo.height}
         sizes="(max-width: 1024px) 100vw, 50vw"
-        className="w-full h-auto lg:self-center lg:rounded-lg"
+        className="w-full h-auto lg:rounded-lg lg:self-start lg:sticky lg:top-16"
         priority
       />
       <div className="p-3 lg:self-center lg:px-4">
@@ -139,6 +140,7 @@ export default function Photo({ session }: PhotoProps) {
             lng={photo.longitude}
           />
         )}
+        <Comments session={session} />
       </div>
     </div>
   );

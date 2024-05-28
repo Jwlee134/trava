@@ -3,7 +3,7 @@ import {
   QueryClient,
   dehydrate,
 } from "@tanstack/react-query";
-import { getPhoto, getPhotoLikeStatus } from "@/libs/api";
+import { getComments, getPhoto, getPhotoLikeStatus } from "@/libs/api";
 import Photo from "./photo";
 import getSession from "@/libs/session";
 import { Metadata } from "next";
@@ -47,6 +47,10 @@ export default async function Page({ params }: { params: { id: string } }) {
   await queryClient.prefetchQuery({
     queryKey: ["photo", id, "like-status"],
     queryFn: () => getPhotoLikeStatus(id),
+  });
+  await queryClient.prefetchQuery({
+    queryKey: ["photo", id, "comments"],
+    queryFn: () => getComments(id),
   });
 
   return (

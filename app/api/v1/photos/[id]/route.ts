@@ -9,7 +9,9 @@ async function getPhoto(id: string) {
   return await prisma.photo.update({
     where: { id },
     data: { views: { increment: 1 } },
-    include: { user: { select: { avatar: true, id: true, username: true } } },
+    include: {
+      user: { select: { avatar: true, id: true, username: true } },
+    },
   });
 }
 

@@ -81,7 +81,7 @@ export default function UploadPhotoForm() {
       ></textarea>
       <button
         disabled={isPending}
-        className={`btn w-full max-w-xs ${isPending && "btn-disabled"}`}
+        className={`btn w-full max-w-xs ${isPending ? "btn-disabled" : ""}`}
       >
         {isPending ? (
           <>
