@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.gm-ui-hover-effect {
+.gm-ui-hover-effect,
+.gm-style-iw-chr {
   display: none !important;
 }
 
