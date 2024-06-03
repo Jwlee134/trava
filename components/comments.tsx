@@ -51,7 +51,7 @@ export default function Comments({
   }
 
   if (!data) return null;
-  console.log(data.comments);
+
   return (
     <>
       <h1 className="text-lg pt-5">
