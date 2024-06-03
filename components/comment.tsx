@@ -47,25 +47,36 @@ export default function Comment({
           className="chat chat-start"
         >
           <div className="chat-image avatar">
-            <div className="relative size-10 rounded-full overflow-hidden">
-              <Image
-                fill
-                src={user.avatar}
-                alt={user.username}
-                className="object-cover"
-              />
+            {user ? (
+              <div className="relative size-10 rounded-full overflow-hidden">
+                <Image
+                  fill
+                  src={user.avatar}
+                  alt={user.username}
+                  className="object-cover"
+                  sizes="40px"
+                />
+              </div>
+            ) : (
+              <div className="avatar placeholder">
+                <div className="bg-neutral text-neutral-content rounded-full w-10">
+                  <span className="text-2xl">?</span>
+                </div>
+              </div>
+            )}
+          </div>
+          {user ? (
+            <div className="chat-header space-x-1">
+              <span>{user.username}</span>
+              <time className="text-xs opacity-50">
+                {dayjs(createdAt).from(Date.now())}
+              </time>
             </div>
-          </div>
-          <div className="chat-header space-x-1">
-            <span>{user.username}</span>
-            <time className="text-xs opacity-50">
-              {dayjs(createdAt).from(Date.now())}
-            </time>
-          </div>
+          ) : null}
           <div className="chat-bubble whitespace-pre-line break-words">
             {content}
           </div>
-          {session.id && (
+          {session.id && user && (
             <div className="chat-footer *:opacity-50 space-x-2">
               {replies && (
                 <button
