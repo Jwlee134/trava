@@ -83,12 +83,16 @@ export async function postChildComment(
   return (await api.post(`/photos/${id}/comments/${parentId}`, body)).data;
 }
 
-export async function updateComment(id: string, body: PostCommentBody) {
-  return (await api.patch(`/photos/${id}/comments/${id}`, body)).data;
+export async function updateComment(
+  id: string,
+  cid: string,
+  body: PostCommentBody
+) {
+  return (await api.patch(`/photos/${id}/comments/${cid}`, body)).data;
 }
 
-export async function deleteComment(id: string) {
-  return (await api.delete(`/photos/${id}/comments/${id}`)).data;
+export async function deleteComment(id: string, cid: string) {
+  return (await api.delete(`/photos/${id}/comments/${cid}`)).data;
 }
 
 export default api;

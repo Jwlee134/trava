@@ -33,7 +33,7 @@ export const PATCH = protectedHandler(
 
     const updatedComment = await prisma.comment.update({
       data: { content },
-      where: { id: params.id },
+      where: { id: params.cid },
       select: { id: true },
     });
 
@@ -47,11 +47,39 @@ export const DELETE = protectedHandler(
     { params }: { params: { id: string; cid: string } },
     session
   ) => {
-    const deletedComment = await prisma.comment.delete({
-      where: { id: params.id },
-      select: { id: true },
+    let target;
+
+    // check if a comment has replies
+    const numOfReplies = await prisma.comment.count({
+      where: { photoId: params.id, parentId: params.cid },
     });
 
-    return NextResponse.json({ id: deletedComment.id });
+    if (numOfReplies > 0) {
+      // if true, update parent's user, content to null, Deleted comment
+      target = await prisma.comment.update({
+        where: { id: params.cid },
+        data: { userId: { set: null }, content: "Deleted comment" },
+        select: { id: true },
+      });
+    } else {
+      // else, delete the comment
+      // it can be both a parent without replies and a reply
+      // if deleted comment was only reply of deleted parent, delete the parent as well
+      await prisma.$transaction(async (tx) => {
+        target = await tx.comment.delete({
+          where: { id: params.cid },
+          select: { id: true },
+        });
+        await tx.comment.deleteMany({
+          where: {
+            photoId: params.id,
+            userId: null,
+            replies: { every: { id: target.id } },
+          },
+        });
+      });
+    }
+
+    return NextResponse.json({ id: target?.id });
   }
 );

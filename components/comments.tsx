@@ -37,11 +37,12 @@ export default function Comments({
   }
 
   const { isPending: isUpdating, mutate: updateFn } = useMutation({
-    mutationFn: (data: PostCommentBody) => updateComment(selectedId, data),
+    mutationFn: (data: PostCommentBody) =>
+      updateComment(id as string, selectedId, data),
     onSuccess,
   });
   const { isPending: isDeleting, mutate: deleteFn } = useMutation({
-    mutationFn: () => deleteComment(selectedId),
+    mutationFn: () => deleteComment(id as string, selectedId),
     onSuccess,
   });
 
@@ -50,7 +51,7 @@ export default function Comments({
   }
 
   if (!data) return null;
-
+  console.log(data.comments);
   return (
     <>
       <h1 className="text-lg pt-5">
