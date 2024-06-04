@@ -1,20 +1,21 @@
 "use client";
 
 import { deleteLike, getPhotoLikeStatus, postLike } from "@/libs/api";
+import { SessionData } from "@/libs/session";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IronSession } from "iron-session";
 import { useParams } from "next/navigation";
 
 interface LikeButtonProps {
-  disabled: boolean;
+  session: IronSession<SessionData>;
 }
 
-export default function LikeButton({ disabled }: LikeButtonProps) {
+export default function LikeButton({ session }: LikeButtonProps) {
   const { id } = useParams();
   const queryKey = ["photo", id, "like-status"];
-
   const { data } = useQuery({
     queryKey,
-    queryFn: () => getPhotoLikeStatus(id as string),
+    queryFn: () => getPhotoLikeStatus(id as string, session.id),
   });
 
   const queryClient = useQueryClient();
@@ -59,7 +60,7 @@ export default function LikeButton({ disabled }: LikeButtonProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <button disabled={disabled} onClick={handleClick}>
+      <button disabled={!session.id} onClick={handleClick}>
         {data?.isLiked ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"

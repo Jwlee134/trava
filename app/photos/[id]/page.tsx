@@ -46,7 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   });
   await queryClient.prefetchQuery({
     queryKey: ["photo", id, "like-status"],
-    queryFn: () => getPhotoLikeStatus(id),
+    queryFn: () => getPhotoLikeStatus(id, session.id),
   });
   await queryClient.prefetchQuery({
     queryKey: ["photo", id, "comments"],

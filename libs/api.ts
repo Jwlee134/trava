@@ -23,8 +23,15 @@ export async function getPhoto(id: string) {
   return (await api.get<GetPhotoReturnType>(`/photos/${id}`)).data;
 }
 
-export async function getPhotoLikeStatus(id: string) {
-  return (await api.get<GetLikeStatusReturnType>(`/photos/${id}/like`)).data;
+export async function getPhotoLikeStatus(
+  id: string,
+  userId: string | undefined
+) {
+  return (
+    await api.get<GetLikeStatusReturnType>(
+      `/photos/${id}/like?userId=${userId ?? ""}`
+    )
+  ).data;
 }
 
 export async function postLike(id: string) {
