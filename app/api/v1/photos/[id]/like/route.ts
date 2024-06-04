@@ -1,19 +1,18 @@
 import prisma from "@/libs/db";
-import getSession from "@/libs/session";
+import { protectedHandler } from "@/libs/server";
 import { Prisma } from "@prisma/client";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export type GetLikeStatusReturnType = Prisma.PromiseReturnType<
   typeof getLikeStatus
 >;
 
-async function getLikeStatus(id: string) {
+async function getLikeStatus(id: string, userId: string | null) {
   let isLiked = false;
-  const session = await getSession();
-  if (session.id) {
+  if (userId) {
     isLiked = Boolean(
       await prisma.like.findFirst({
-        where: { userId: session.id, photoId: id },
+        where: { userId, photoId: id },
       })
     );
   }
@@ -22,40 +21,32 @@ async function getLikeStatus(id: string) {
 }
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const status = await getLikeStatus(params.id);
+  const searchParams = request.nextUrl.searchParams;
+  const userId = searchParams.get("userId");
+  const status = await getLikeStatus(params.id, userId);
 
   return NextResponse.json(status);
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const session = await getSession();
-  if (!session.id)
-    return NextResponse.json({ success: false }, { status: 401 });
+export const POST = protectedHandler(
+  async (request: Request, { params }: { params: { id: string } }, session) => {
+    await prisma.like.create({
+      data: { photoId: params.id, userId: session.id },
+    });
 
-  await prisma.like.create({
-    data: { photoId: params.id, userId: session.id },
-  });
+    return NextResponse.json({ success: true });
+  }
+);
 
-  return NextResponse.json({ success: true });
-}
+export const DELETE = protectedHandler(
+  async (request: Request, { params }: { params: { id: string } }, session) => {
+    await prisma.like.deleteMany({
+      where: { photoId: params.id, userId: session.id },
+    });
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const session = await getSession();
-  if (!session.id)
-    return NextResponse.json({ success: false }, { status: 401 });
-
-  await prisma.like.deleteMany({
-    where: { photoId: params.id, userId: session.id },
-  });
-
-  return NextResponse.json({ success: true });
-}
+    return NextResponse.json({ success: true });
+  }
+);

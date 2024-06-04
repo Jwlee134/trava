@@ -88,7 +88,7 @@ export default function Photo({ session }: PhotoProps) {
                 </svg>
                 <span className="text-xs">{photo.views}</span>
               </div>
-              <LikeButton disabled={!session.id} />
+              <LikeButton session={session} />
             </div>
           </div>
         </div>
