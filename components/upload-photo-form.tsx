@@ -1,9 +1,10 @@
 "use client";
 
-import { postPhoto } from "@/libs/api";
+import { BaseResponse, postPhoto } from "@/libs/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface Form {
@@ -23,11 +24,20 @@ export default function UploadPhotoForm() {
     setValue,
     clearErrors,
   } = useForm<Form>();
-  const { mutate, isPending } = useMutation({
+  const [response, setResponse] = useState<BaseResponse | null>(null);
+  const { mutate, isPending } = useMutation<
+    BaseResponse & { id: string },
+    AxiosError<BaseResponse>,
+    FormData
+  >({
     mutationFn: postPhoto,
     onSuccess(data) {
+      setResponse(data);
       queryClient.invalidateQueries({ queryKey: ["photos"] });
-      router.push(`/photos/${data?.id}`);
+      router.push(`/photos/${data.id}`);
+    },
+    onError: (err) => {
+      setResponse(err.response?.data!);
     },
   });
 
@@ -75,6 +85,7 @@ export default function UploadPhotoForm() {
         className="input input-bordered w-full max-w-xs"
       />
       <textarea
+        aria-label="caption"
         {...register("caption")}
         placeholder="Caption(optional)"
         className="textarea textarea-bordered w-full max-w-xs"
@@ -91,6 +102,14 @@ export default function UploadPhotoForm() {
           "Upload"
         )}
       </button>
+      <p
+        key={response?.timestamp}
+        aria-live="polite"
+        className="sr-only"
+        role="status"
+      >
+        {response?.message}
+      </p>
     </form>
   );
 }

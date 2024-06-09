@@ -1,10 +1,18 @@
 "use client";
 
-import { deleteLike, getPhotoLikeStatus, postLike } from "@/libs/api";
+import { GetLikeStatusReturnType } from "@/app/api/v1/photos/[id]/like/route";
+import {
+  BaseResponse,
+  deleteLike,
+  getPhotoLikeStatus,
+  postLike,
+} from "@/libs/api";
 import { SessionData } from "@/libs/session";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { IronSession } from "iron-session";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 
 interface LikeButtonProps {
   session: IronSession<SessionData>;
@@ -17,6 +25,7 @@ export default function LikeButton({ session }: LikeButtonProps) {
     queryKey,
     queryFn: () => getPhotoLikeStatus(id as string, session.id),
   });
+  const [response, setResponse] = useState<BaseResponse | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -32,24 +41,28 @@ export default function LikeButton({ session }: LikeButtonProps) {
     );
     return prevState;
   }
-  function onError(c: any) {
-    queryClient.setQueryData(queryKey, c.prevState);
+  function onError(err: Error, prevState: GetLikeStatusReturnType) {
+    if (err instanceof AxiosError) setResponse(err.response?.data);
+    queryClient.setQueryData(queryKey, prevState);
   }
-  function onSuccess() {
-    queryClient.invalidateQueries({ queryKey });
-    queryClient.invalidateQueries({ queryKey: ["profile", "liked-photos"] });
+  function onSuccess(data: BaseResponse) {
+    if (data.success) {
+      setResponse(data);
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["profile", "liked-photos"] });
+    }
   }
 
   const { mutate: likePhoto } = useMutation({
     mutationFn: postLike,
     onMutate: () => onMutate(true),
-    onError: (err, newData, context: any) => onError(context),
+    onError: (err, newData, context: any) => onError(err, context),
     onSuccess,
   });
   const { mutate: dislikePhoto } = useMutation({
     mutationFn: deleteLike,
     onMutate: () => onMutate(false),
-    onError: (err, newData, context: any) => onError(context),
+    onError: (err, newData, context: any) => onError(err, context),
     onSuccess,
   });
 
@@ -60,7 +73,11 @@ export default function LikeButton({ session }: LikeButtonProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <button disabled={!session.id} onClick={handleClick}>
+      <button
+        aria-label={data?.isLiked ? "dislike photo" : "like photo"}
+        disabled={!session.id}
+        onClick={handleClick}
+      >
         {data?.isLiked ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -88,6 +105,14 @@ export default function LikeButton({ session }: LikeButtonProps) {
         )}
       </button>
       <span className="text-xs">{data?.likeCount}</span>
+      <p
+        key={response?.timestamp}
+        aria-live="polite"
+        className="sr-only"
+        role="status"
+      >
+        {response?.message}
+      </p>
     </div>
   );
 }
