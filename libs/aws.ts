@@ -12,7 +12,7 @@ const client = new S3Client({
   region: process.env.AWS_REGION!,
 });
 
-export async function uploadPhoto(buffer: Buffer, key: string) {
+export async function uploadAwsPhoto(buffer: Buffer, key: string) {
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_S3_BUCKET!,
     Key: key,
@@ -24,7 +24,7 @@ export async function uploadPhoto(buffer: Buffer, key: string) {
     .AWS_REGION!}.amazonaws.com/${key}`;
 }
 
-export async function deletePhoto(key: string) {
+export async function deleteAwsPhoto(key: string) {
   const command = new DeleteObjectCommand({
     Bucket: process.env.AWS_S3_BUCKET!,
     Key: key,

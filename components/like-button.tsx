@@ -1,67 +1,40 @@
 "use client";
 
-import { deleteLike, getPhotoLikeStatus, postLike } from "@/libs/api";
+import {
+  GetLikeStatusReturnType,
+  createLike,
+  deleteLike,
+} from "@/app/photos/[id]/actions";
 import { SessionData } from "@/libs/session";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { IronSession } from "iron-session";
 import { useParams } from "next/navigation";
+import { useOptimistic } from "react";
 
 interface LikeButtonProps {
+  status: GetLikeStatusReturnType;
   session: IronSession<SessionData>;
 }
 
-export default function LikeButton({ session }: LikeButtonProps) {
-  const { id } = useParams();
-  const queryKey = ["photo", id, "like-status"];
-  const { data } = useQuery({
-    queryKey,
-    queryFn: () => getPhotoLikeStatus(id as string, session.id),
-  });
+export default function LikeButton({ status, session }: LikeButtonProps) {
+  const id = useParams().id as string;
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(
+    status,
+    ({ isLiked, likeCount }) => ({
+      isLiked: !isLiked,
+      likeCount: isLiked ? likeCount - 1 : likeCount + 1,
+    })
+  );
 
-  const queryClient = useQueryClient();
-
-  async function onMutate(isPostLike: boolean) {
-    await queryClient.cancelQueries({ queryKey });
-    const prevState = queryClient.getQueryData(queryKey);
-    queryClient.setQueryData(
-      queryKey,
-      ({ isLiked, likeCount }: { isLiked: boolean; likeCount: number }) => ({
-        isLiked: !isLiked,
-        likeCount: isPostLike ? likeCount + 1 : likeCount - 1,
-      })
-    );
-    return prevState;
-  }
-  function onError(c: any) {
-    queryClient.setQueryData(queryKey, c.prevState);
-  }
-  function onSuccess() {
-    queryClient.invalidateQueries({ queryKey });
-    queryClient.invalidateQueries({ queryKey: ["profile", "liked-photos"] });
-  }
-
-  const { mutate: likePhoto } = useMutation({
-    mutationFn: postLike,
-    onMutate: () => onMutate(true),
-    onError: (err, newData, context: any) => onError(context),
-    onSuccess,
-  });
-  const { mutate: dislikePhoto } = useMutation({
-    mutationFn: deleteLike,
-    onMutate: () => onMutate(false),
-    onError: (err, newData, context: any) => onError(context),
-    onSuccess,
-  });
-
-  async function handleClick() {
-    if (data?.isLiked) dislikePhoto(id as string);
-    else likePhoto(id as string);
+  async function action() {
+    setOptimisticStatus(undefined);
+    optimisticStatus.isLiked ? await deleteLike(id) : await createLike(id);
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <button disabled={!session.id} onClick={handleClick}>
-        {data?.isLiked ? (
+    <form action={action} className="flex flex-col items-center opacity-80">
+      <input type="hidden" name="" />
+      <button type="submit" disabled={!session.id}>
+        {optimisticStatus?.isLiked ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -87,7 +60,7 @@ export default function LikeButton({ session }: LikeButtonProps) {
           </svg>
         )}
       </button>
-      <span className="text-xs">{data?.likeCount}</span>
-    </div>
+      <span className="text-xs">{optimisticStatus?.likeCount}</span>
+    </form>
   );
 }

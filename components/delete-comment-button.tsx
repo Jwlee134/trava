@@ -1,13 +1,13 @@
 import { useFormStatus } from "react-dom";
 
-export default function DeletePhotoButton() {
+export default function DeleteCommentButton() {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
       disabled={pending}
-      className={`btn btn-block btn-error ${pending && "btn-disabled"}`}
+      className={`btn btn-block btn-error ${pending ? "btn-disabled" : ""}`}
     >
       {pending ? (
         <>
