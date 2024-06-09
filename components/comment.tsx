@@ -1,4 +1,3 @@
-import { GetCommentsReturnType } from "@/app/api/v1/photos/[id]/comments/route";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
@@ -6,9 +5,8 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { CommentForm } from "./comment-form";
 import { IronSession } from "iron-session";
 import { SessionData } from "@/libs/session";
-import { PostCommentBody } from "./comments";
-import { UseFormSetValue } from "react-hook-form";
 import { AnimatePresence, motion } from "framer-motion";
+import { GetCommentsReturnType } from "@/app/photos/[id]/actions";
 dayjs.extend(relativeTime);
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
@@ -20,12 +18,15 @@ export default function Comment({
   createdAt,
   replies,
   session,
-  setSelectedId,
-  setValue,
+  setEditCommentData,
 }: Optional<GetCommentsReturnType["comments"][number], "replies"> & {
   session: IronSession<SessionData>;
-  setSelectedId: Dispatch<SetStateAction<string>>;
-  setValue: UseFormSetValue<PostCommentBody>;
+  setEditCommentData: Dispatch<
+    SetStateAction<{
+      id: string;
+      value: string;
+    }>
+  >;
 }) {
   const [parentId, setParentId] = useState("");
 
@@ -33,8 +34,7 @@ export default function Comment({
     (
       document.getElementById("edit_comment_modal") as HTMLDialogElement
     ).showModal();
-    setValue("content", content);
-    setSelectedId(id);
+    setEditCommentData({ id, value: content });
   }
 
   return (
@@ -92,26 +92,18 @@ export default function Comment({
           )}
         </motion.div>
       </AnimatePresence>
-      <AnimatePresence>
-        {parentId && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="chat-footer w-full pl-14"
-          >
-            <CommentForm parentId={parentId} setParentId={setParentId} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {parentId && (
+        <div className="chat-footer w-full pl-14">
+          <CommentForm parentId={parentId} setParentId={setParentId} />
+        </div>
+      )}
       {replies?.length ? (
         <div className="pl-14">
           {replies.map((reply) => (
             <Comment
               key={reply.id}
               session={session}
-              setSelectedId={setSelectedId}
-              setValue={setValue}
+              setEditCommentData={setEditCommentData}
               {...reply}
             />
           ))}

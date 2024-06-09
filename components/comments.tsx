@@ -1,56 +1,42 @@
-import { deleteComment, getComments, updateComment } from "@/libs/api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import Comment from "./comment";
+"use client";
+
 import { CommentForm } from "./comment-form";
 import { IronSession } from "iron-session";
 import { SessionData } from "@/libs/session";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
+import {
+  GetCommentsReturnType,
+  deleteComment,
+  updateComment,
+} from "@/app/photos/[id]/actions";
+import { useEffect, useRef, useState } from "react";
+import Comment from "./comment";
+import { useParams } from "next/navigation";
+import { useFormState } from "react-dom";
+import DeleteCommentButton from "./delete-comment-button";
+import UpdateButton from "./update-button";
 
-export interface PostCommentBody {
-  content: string;
+interface CommentsProps {
+  session: IronSession<SessionData>;
+  data: GetCommentsReturnType;
 }
 
-export default function Comments({
-  session,
-}: {
-  session: IronSession<SessionData>;
-}) {
-  const { id } = useParams();
-  const queryKey = ["photo", id, "comments"];
-  const queryClient = useQueryClient();
-  const { data } = useQuery({
-    queryKey,
-    queryFn: () => getComments(id as string),
-  });
-  const [selectedId, setSelectedId] = useState("");
-  const { register, handleSubmit, setValue } = useForm<PostCommentBody>();
+export default function Comments({ session, data }: CommentsProps) {
+  const id = useParams().id as string;
+  const formRef = useRef<HTMLFormElement>(null);
+  const [editCommentData, setEditCommentData] = useState({ id: "", value: "" });
+  const [updateState, updateAction] = useFormState(updateComment, null);
+  const [deleteState, deleteAction] = useFormState(deleteComment, null);
 
-  function onSuccess() {
-    queryClient.invalidateQueries({ queryKey });
-    setValue("content", "");
-    setSelectedId("");
-    (
-      document.getElementById("edit_comment_modal") as HTMLDialogElement
-    ).close();
-  }
-
-  const { isPending: isUpdating, mutate: updateFn } = useMutation({
-    mutationFn: (data: PostCommentBody) =>
-      updateComment(id as string, selectedId, data),
-    onSuccess,
-  });
-  const { isPending: isDeleting, mutate: deleteFn } = useMutation({
-    mutationFn: () => deleteComment(id as string, selectedId),
-    onSuccess,
-  });
-
-  function onValid(data: PostCommentBody) {
-    updateFn(data);
-  }
-
-  if (!data) return null;
+  useEffect(() => {
+    if (updateState?.success || deleteState?.success) {
+      if (updateState?.success) {
+        formRef.current?.reset();
+      }
+      (
+        document.getElementById("edit_comment_modal") as HTMLDialogElement
+      ).close();
+    }
+  }, [updateState, deleteState]);
 
   return (
     <>
@@ -62,8 +48,7 @@ export default function Comments({
         <Comment
           key={comment.id}
           session={session}
-          setSelectedId={setSelectedId}
-          setValue={setValue}
+          setEditCommentData={setEditCommentData}
           {...comment}
         />
       ))}
@@ -74,44 +59,31 @@ export default function Comments({
               ✕
             </button>
           </form>
-          <form onSubmit={handleSubmit(onValid)}>
+          <form action={updateAction} ref={formRef}>
             <div className="flex flex-col gap-3">
               <h3 className="font-bold text-lg">Edit Comment</h3>
+              <input type="hidden" name="photoId" value={id} />
+              <input
+                type="hidden"
+                name="commentId"
+                value={editCommentData.id}
+              />
               <textarea
-                {...register("content")}
-                placeholder="Caption"
+                name="content"
+                placeholder="Content"
                 className="textarea textarea-bordered w-full"
+                defaultValue={editCommentData.value}
+                required
               ></textarea>
-              <button
-                disabled={isUpdating}
-                className={`btn btn-block ${isUpdating ? "btn-disabled" : ""}`}
-              >
-                {isUpdating ? (
-                  <>
-                    <span className="loading loading-spinner"></span> Updating
-                  </>
-                ) : (
-                  "Update"
-                )}
-              </button>
+              <UpdateButton />
             </div>
             <div className="divider"></div>
           </form>
-          <button
-            disabled={isDeleting}
-            className={`btn btn-block btn-error ${
-              isDeleting ? "btn-disabled" : ""
-            }`}
-            onClick={() => deleteFn()}
-          >
-            {isDeleting ? (
-              <>
-                <span className="loading loading-spinner"></span> Deleting
-              </>
-            ) : (
-              "Delete"
-            )}
-          </button>
+          <form action={deleteAction}>
+            <input type="hidden" name="photoId" value={id} />
+            <input type="hidden" name="commentId" value={editCommentData.id} />
+            <DeleteCommentButton />
+          </form>
         </div>
       </dialog>
     </>

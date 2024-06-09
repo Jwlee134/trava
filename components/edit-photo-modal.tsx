@@ -1,11 +1,42 @@
 "use client";
 
-import { ReactNode } from "react";
+import { deletePhoto, updatePhoto } from "@/app/photos/[id]/actions";
+import { useParams, useRouter } from "next/navigation";
+import { useFormState } from "react-dom";
+import DeletePhotoButton from "./delete-photo-button";
+import UpdateButton from "./update-button";
+import { useEffect, useRef } from "react";
 
-export default function EditPhotoModal({ children }: { children: ReactNode }) {
+interface EditPhotoModalProps {
+  title: string;
+  caption: string;
+}
+
+export default function EditPhotoModal({
+  title,
+  caption,
+}: EditPhotoModalProps) {
+  const id = useParams().id;
+  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
+  const [updateState, updateAction] = useFormState(updatePhoto, null);
+  const [deleteState, deleteAction] = useFormState(deletePhoto, null);
+
   function handleEditClick() {
     (document.getElementById("edit_modal") as HTMLDialogElement).showModal();
   }
+
+  useEffect(() => {
+    if (updateState?.success || deleteState?.success) {
+      if (updateState?.success) {
+        formRef.current?.reset();
+      }
+      if (deleteState?.success) {
+        router.replace("/");
+      }
+      (document.getElementById("edit_modal") as HTMLDialogElement).close();
+    }
+  }, [updateState, deleteState, router]);
 
   return (
     <>
@@ -29,7 +60,30 @@ export default function EditPhotoModal({ children }: { children: ReactNode }) {
               ✕
             </button>
           </form>
-          {children}
+          <form ref={formRef} action={updateAction}>
+            <div className="flex flex-col gap-3">
+              <h3 className="font-bold text-lg">Edit Photo</h3>
+              <input type="hidden" name="photoId" value={id} />
+              <input
+                name="title"
+                placeholder="Title"
+                className="input input-bordered w-full"
+                defaultValue={title}
+              />
+              <textarea
+                name="caption"
+                placeholder="Caption"
+                className="textarea textarea-bordered w-full"
+                defaultValue={caption}
+              ></textarea>
+              <UpdateButton />
+            </div>
+            <div className="divider"></div>
+          </form>
+          <form action={deleteAction}>
+            <input type="hidden" name="photoId" value={id} />
+            <DeletePhotoButton />
+          </form>
         </div>
       </dialog>
     </>

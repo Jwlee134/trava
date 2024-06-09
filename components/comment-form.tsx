@@ -1,9 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PostCommentBody } from "./comments";
-import { postChildComment, postComment } from "@/libs/api";
 import { useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { UploadCommentButton } from "./upload-comment-button";
+import { useFormState } from "react-dom";
+import { createComment, createReply } from "@/app/photos/[id]/actions";
 
 interface CommentFormProps {
   parentId?: string;
@@ -11,70 +10,39 @@ interface CommentFormProps {
 }
 
 export function CommentForm({ parentId, setParentId }: CommentFormProps) {
-  const { id } = useParams();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<PostCommentBody>();
-  const queryClient = useQueryClient();
+  const formRef = useRef<HTMLFormElement>(null);
+  const id = useParams().id as string;
+  const [state, action] = useFormState(
+    parentId ? createReply : createComment,
+    null
+  );
 
-  const mutationFn = (data: PostCommentBody) =>
-    parentId
-      ? postChildComment(id as string, parentId, data)
-      : postComment(id as string, data);
-
-  const { mutate, isPending } = useMutation({
-    mutationFn,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["photo", id, "comments"] });
-      setValue("content", "");
+  useEffect(() => {
+    if (state?.success) {
+      formRef.current?.reset();
       if (setParentId) setParentId("");
-    },
-  });
-
-  function onValid(data: PostCommentBody) {
-    mutate(data);
-  }
+    }
+  }, [state?.success, setParentId]);
 
   return (
     <form
+      ref={formRef}
+      action={action}
       className="flex items-center gap-2 py-3"
-      onSubmit={handleSubmit(onValid)}
     >
+      <input type="hidden" name="photoId" value={id} />
+      {parentId ? (
+        <input type="hidden" name="parentId" value={parentId} />
+      ) : null}
       <textarea
+        name="content"
         className={`textarea textarea-bordered textarea-xs w-full ${
-          errors.content?.message ? "textarea-error" : ""
+          state?.errors?.fieldErrors.content ? "textarea-error" : ""
         }`}
         placeholder="Write a comment..."
-        {...register("content", { required: true })}
+        required
       ></textarea>
-      <button
-        disabled={isPending}
-        className={`btn btn-square ${isPending ? "btn-disabled" : ""}`}
-      >
-        {isPending ? (
-          <>
-            <span className="loading loading-spinner"></span>
-          </>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-            />
-          </svg>
-        )}
-      </button>
+      <UploadCommentButton />
     </form>
   );
 }

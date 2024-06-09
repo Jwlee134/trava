@@ -1,32 +1,18 @@
-import {
-  HydrationBoundary,
-  QueryClient,
-  dehydrate,
-} from "@tanstack/react-query";
-import { getPhotos } from "@/libs/api";
-import Home from "./home";
 import { Metadata } from "next";
+import { getPhotos } from "./actions";
+import Photos from "./photos";
+import { unstable_cache } from "next/cache";
 
 export const metadata: Metadata = {
   title: "Home",
 };
 
-export const revalidate = 0;
+const getCachedPhotos = unstable_cache(getPhotos, ["photos"], {
+  tags: ["photos"],
+});
 
-export default async function Page() {
-  const queryClient = new QueryClient();
+export default async function Home() {
+  const photos = await getCachedPhotos();
 
-  await queryClient.prefetchInfiniteQuery({
-    queryKey: ["photos"],
-    queryFn: getPhotos,
-    initialPageParam: "",
-    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
-    pages: 1,
-  });
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <Home />
-    </HydrationBoundary>
-  );
+  return <Photos initialPhotos={photos} fetchMorePhotos={getPhotos} />;
 }
