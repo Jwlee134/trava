@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PostCommentBody } from "./comments";
-import { postChildComment, postComment } from "@/libs/api";
+import { BaseResponse, postChildComment, postComment } from "@/libs/api";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { AxiosError } from "axios";
 
 interface CommentFormProps {
   parentId?: string;
@@ -19,18 +20,27 @@ export function CommentForm({ parentId, setParentId }: CommentFormProps) {
     setValue,
   } = useForm<PostCommentBody>();
   const queryClient = useQueryClient();
+  const [response, setResponse] = useState<BaseResponse | null>(null);
 
   const mutationFn = (data: PostCommentBody) =>
     parentId
       ? postChildComment(id as string, parentId, data)
       : postComment(id as string, data);
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending } = useMutation<
+    BaseResponse,
+    AxiosError<BaseResponse>,
+    PostCommentBody
+  >({
     mutationFn,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setResponse(data);
       queryClient.invalidateQueries({ queryKey: ["photo", id, "comments"] });
       setValue("content", "");
       if (setParentId) setParentId("");
+    },
+    onError: (err) => {
+      setResponse(err.response?.data!);
     },
   });
 
@@ -44,13 +54,15 @@ export function CommentForm({ parentId, setParentId }: CommentFormProps) {
       onSubmit={handleSubmit(onValid)}
     >
       <textarea
+        aria-label={parentId ? "reply" : "comment"}
         className={`textarea textarea-bordered textarea-xs w-full ${
           errors.content?.message ? "textarea-error" : ""
         }`}
-        placeholder="Write a comment..."
+        placeholder={`Write a ${parentId ? "reply" : "comment"}...`}
         {...register("content", { required: true })}
       ></textarea>
       <button
+        aria-label={`${parentId ? "reply" : "comment"} upload`}
         disabled={isPending}
         className={`btn btn-square ${isPending ? "btn-disabled" : ""}`}
       >
@@ -75,6 +87,14 @@ export function CommentForm({ parentId, setParentId }: CommentFormProps) {
           </svg>
         )}
       </button>
+      <p
+        key={response?.timestamp}
+        aria-live="polite"
+        className="sr-only"
+        role="status"
+      >
+        {response?.message}
+      </p>
     </form>
   );
 }

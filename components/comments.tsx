@@ -1,4 +1,9 @@
-import { deleteComment, getComments, updateComment } from "@/libs/api";
+import {
+  BaseResponse,
+  deleteComment,
+  getComments,
+  updateComment,
+} from "@/libs/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import Comment from "./comment";
@@ -7,6 +12,7 @@ import { IronSession } from "iron-session";
 import { SessionData } from "@/libs/session";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { AxiosError } from "axios";
 
 export interface PostCommentBody {
   content: string;
@@ -26,8 +32,11 @@ export default function Comments({
   });
   const [selectedId, setSelectedId] = useState("");
   const { register, handleSubmit, setValue } = useForm<PostCommentBody>();
+  const [response, setResponse] = useState<BaseResponse | null>(null);
 
-  function onSuccess() {
+  function onSuccess(data: BaseResponse) {
+    console.log(data);
+    setResponse(data);
     queryClient.invalidateQueries({ queryKey });
     setValue("content", "");
     setSelectedId("");
@@ -35,15 +44,22 @@ export default function Comments({
       document.getElementById("edit_comment_modal") as HTMLDialogElement
     ).close();
   }
+  function onError(error: Error) {
+    if (error instanceof AxiosError) {
+      setResponse(error.response?.data);
+    }
+  }
 
   const { isPending: isUpdating, mutate: updateFn } = useMutation({
     mutationFn: (data: PostCommentBody) =>
       updateComment(id as string, selectedId, data),
     onSuccess,
+    onError: (error, variables, context) => onError(error),
   });
   const { isPending: isDeleting, mutate: deleteFn } = useMutation({
     mutationFn: () => deleteComment(id as string, selectedId),
     onSuccess,
+    onError: (error, variables, context) => onError(error),
   });
 
   function onValid(data: PostCommentBody) {
@@ -70,7 +86,10 @@ export default function Comments({
       <dialog id="edit_comment_modal" className="modal">
         <div className="modal-box">
           <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            <button
+              aria-label="close modal"
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            >
               ✕
             </button>
           </form>
@@ -114,6 +133,14 @@ export default function Comments({
           </button>
         </div>
       </dialog>
+      <p
+        key={response?.timestamp}
+        aria-live="polite"
+        className="sr-only"
+        role="status"
+      >
+        {response?.message}
+      </p>
     </>
   );
 }

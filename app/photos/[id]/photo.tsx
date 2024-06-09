@@ -1,8 +1,6 @@
 "use client";
 
 import Comments from "@/components/comments";
-import DeletePhotoButton from "@/components/delete-photo-button";
-import EditPhotoForm from "@/components/edit-photo-form";
 import EditPhotoModal from "@/components/edit-photo-modal";
 import LikeButton from "@/components/like-button";
 import PhotoDetailMap from "@/components/photo-detail-map";
@@ -66,10 +64,7 @@ export default function Photo({ session }: PhotoProps) {
           </div>
           <div className="flex items-center gap-4">
             {(session.id === photo.user.id || session.isAdmin) && (
-              <EditPhotoModal>
-                <EditPhotoForm title={photo.title} caption={photo.caption} />
-                <DeletePhotoButton />
-              </EditPhotoModal>
+              <EditPhotoModal title={photo.title} caption={photo.caption} />
             )}
             <div className="flex gap-4 opacity-80">
               <div className="flex flex-col items-center">

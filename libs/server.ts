@@ -11,7 +11,10 @@ export function protectedHandler<T, K>(
   return async function (request: Request, paramsObject: { params: T }) {
     const session = await getSession();
     if (!session.id)
-      return NextResponse.json({ success: false }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "You need to login." },
+        { status: 401 }
+      );
     return await handler(
       request,
       paramsObject,

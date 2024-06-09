@@ -44,16 +44,32 @@ export async function GET(
 export const POST = protectedHandler(
   async (request, { params }: { params: { id: string } }, session) => {
     const { content } = await request.json();
+    let newComment;
 
-    const newComment = await prisma.comment.create({
-      data: {
-        content,
-        user: { connect: { id: session.id } },
-        photo: { connect: { id: params.id } },
-      },
-      select: { id: true },
+    try {
+      newComment = await prisma.comment.create({
+        data: {
+          content,
+          user: { connect: { id: session.id } },
+          photo: { connect: { id: params.id } },
+        },
+        select: { id: true },
+      });
+    } catch {
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Failed to create a comment.",
+          timestamp: Date.now(),
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Successfully created a comment.",
+      timestamp: Date.now(),
     });
-
-    return NextResponse.json({ id: newComment.id });
   }
 );

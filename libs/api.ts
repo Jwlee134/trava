@@ -10,13 +10,19 @@ import axios from "axios";
 
 const api = axios.create({ baseURL: `${process.env.NEXT_PUBLIC_URL}/api/v1` });
 
+export interface BaseResponse {
+  success: boolean;
+  message: string;
+  timestamp: number;
+}
+
 export async function getPhotos({ pageParam }: { pageParam: string }) {
   return (await api.get<GetPhotosReturnType>(`/photos?cursor=${pageParam}`))
     .data;
 }
 
 export async function postPhoto(body: FormData) {
-  return (await api.post<{ id: number }>("/photos", body)).data;
+  return (await api.post<BaseResponse & { id: string }>("/photos", body)).data;
 }
 
 export async function getPhoto(id: string) {
@@ -35,11 +41,11 @@ export async function getPhotoLikeStatus(
 }
 
 export async function postLike(id: string) {
-  return (await api.post(`/photos/${id}/like`)).data;
+  return (await api.post<BaseResponse>(`/photos/${id}/like`)).data;
 }
 
 export async function deleteLike(id: string) {
-  return (await api.delete(`/photos/${id}/like`)).data;
+  return (await api.delete<BaseResponse>(`/photos/${id}/like`)).data;
 }
 
 export interface UpdatePhotoBody {

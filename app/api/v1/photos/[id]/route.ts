@@ -30,23 +30,55 @@ export async function PATCH(
 ) {
   const { title, caption } = await request.json();
 
-  await prisma.photo.update({
-    data: { title, caption },
-    where: { id: params.id },
-  });
+  try {
+    await prisma.photo.update({
+      data: { title, caption },
+      where: { id: params.id },
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to update the photo.",
+        timestamp: Date.now(),
+      },
+      { status: 500 }
+    );
+  }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+    message: "Successfully updated the photo.",
+    timestamp: Date.now(),
+  });
 }
 
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const photo = await prisma.photo.delete({
-    where: { id: params.id },
-    select: { url: true },
-  });
-  await deletePhoto(photo.url.split("amazonaws.com/")[1]);
+  try {
+    await prisma.$transaction(async (tx) => {
+      const photo = await tx.photo.delete({
+        where: { id: params.id },
+        select: { url: true },
+      });
+      await deletePhoto(photo.url.split("amazonaws.com/")[1]);
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to delete the photo.",
+        timestamp: Date.now(),
+      },
+      { status: 500 }
+    );
+  }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+    message: "Successfully deleted the photo.",
+    timestamp: Date.now(),
+  });
 }

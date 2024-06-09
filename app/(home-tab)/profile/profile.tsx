@@ -1,6 +1,6 @@
 "use client";
 
-import { getProfile, logout } from "@/libs/api";
+import { BaseResponse, getProfile, logout } from "@/libs/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +13,7 @@ export function Profile({ id }: { id: string }) {
     queryKey: ["profile"],
     queryFn: () => getProfile(id),
   });
-  const { mutate } = useMutation({
+  const { mutate, data } = useMutation<BaseResponse>({
     mutationFn: logout,
     onSuccess: () => {
       router.push("/");
@@ -75,6 +75,9 @@ export function Profile({ id }: { id: string }) {
           </li>
         </ul>
       </div>
+      <p aria-live="polite" className="sr-only" role="status">
+        {data?.message}
+      </p>
     </div>
   );
 }
