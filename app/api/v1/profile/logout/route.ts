@@ -5,5 +5,8 @@ export async function POST() {
   const session = await getSession();
   session.destroy();
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+    message: "You are logged out successfully.",
+  });
 }

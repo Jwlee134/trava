@@ -33,20 +33,50 @@ export async function GET(
 
 export const POST = protectedHandler(
   async (request: Request, { params }: { params: { id: string } }, session) => {
-    await prisma.like.create({
-      data: { photoId: params.id, userId: session.id },
-    });
+    try {
+      await prisma.like.create({
+        data: { photoId: params.id, userId: session.id },
+      });
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to like the photo.",
+          timestamp: Date.now(),
+        },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Successfully liked the photo.",
+      timestamp: Date.now(),
+    });
   }
 );
 
 export const DELETE = protectedHandler(
   async (request: Request, { params }: { params: { id: string } }, session) => {
-    await prisma.like.deleteMany({
-      where: { photoId: params.id, userId: session.id },
-    });
+    try {
+      await prisma.like.deleteMany({
+        where: { photoId: params.id, userId: session.id },
+      });
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Failed to dislike the photo.",
+          timestamp: Date.now(),
+        },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Successfully disliked the photo.",
+      timestamp: Date.now(),
+    });
   }
 );
